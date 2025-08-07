@@ -1,0 +1,119 @@
+{
+  "sample_notes": [
+    {
+      "note_id": "test_note_1",
+      "source_file": "sample_1.png",
+      "raw_text": "This is a sample handwritten note for testing OCR functionality.",
+      "clean_text": "This is a sample handwritten note for testing OCR functionality.",
+      "ocr_provider": "tesseract",
+      "ocr_confidence": 0.85,
+      "processing_cost": 0.0,
+      "expected_keywords": [
+        "sample",
+        "handwritten",
+        "note",
+        "testing",
+        "OCR"
+      ]
+    },
+    {
+      "note_id": "test_note_2",
+      "source_file": "sample_2.png",
+      "raw_text": "Ghost Writer processes handwritten notes into digital text.",
+      "clean_text": "Ghost Writer processes handwritten notes into digital text.",
+      "ocr_provider": "cloud_vision",
+      "ocr_confidence": 0.92,
+      "processing_cost": 0.0015,
+      "expected_keywords": [
+        "Ghost",
+        "Writer",
+        "processes",
+        "handwritten",
+        "digital"
+      ]
+    },
+    {
+      "note_id": "test_note_3",
+      "source_file": "sample_3.png",
+      "raw_text": "Machine learning models help analyze writing patterns and style.",
+      "clean_text": "Machine learning models help analyze writing patterns and style.",
+      "ocr_provider": "hybrid",
+      "ocr_confidence": 0.88,
+      "processing_cost": 0.0,
+      "expected_keywords": [
+        "machine",
+        "learning",
+        "analyze",
+        "writing",
+        "patterns"
+      ]
+    }
+  ],
+  "test_expansions": [
+    {
+      "note_id": "test_note_1",
+      "prompt": "Expand this into a blog post about OCR testing",
+      "expected_themes": [
+        "OCR",
+        "testing",
+        "automation",
+        "handwriting"
+      ],
+      "min_length": 200,
+      "max_length": 1000
+    }
+  ],
+  "test_searches": [
+    {
+      "query": "handwritten notes",
+      "expected_results": [
+        "test_note_1",
+        "test_note_2"
+      ],
+      "min_similarity": 0.7
+    },
+    {
+      "query": "machine learning",
+      "expected_results": [
+        "test_note_3"
+      ],
+      "min_similarity": 0.8
+    }
+  ],
+  "performance_benchmarks": {
+    "ocr_processing": {
+      "max_duration": 30.0,
+      "unit": "seconds"
+    },
+    "database_insert": {
+      "max_duration": 0.1,
+      "unit": "seconds"
+    },
+    "search_query": {
+      "max_duration": 0.5,
+      "unit": "seconds"
+    },
+    "embedding_generation": {
+      "max_duration": 2.0,
+      "unit": "seconds"
+    }
+  },
+  "error_scenarios": [
+    {
+      "scenario": "corrupted_image",
+      "input": "corrupted_file.png",
+      "expected_error": "InvalidImageError"
+    },
+    {
+      "scenario": "network_failure",
+      "provider": "cloud_vision",
+      "expected_fallback": "tesseract"
+    },
+    {
+      "scenario": "budget_exceeded",
+      "daily_cost": 10.0,
+      "budget_limit": 5.0,
+      "expected_behavior": "fallback_to_tesseract"
+    }
+  ]
+}

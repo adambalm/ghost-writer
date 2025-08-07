@@ -1,0 +1,104 @@
+# Ghost Writer Configuration
+
+# Database settings
+database:
+  path: "data/database/ghost_writer.db"
+
+# OCR Provider Configuration
+ocr:
+  # Options: "tesseract", "cloud_vision", "hybrid"
+  default_provider: "hybrid"
+  
+  providers:
+    tesseract:
+      # Tesseract OCR Engine settings
+      config: "--oem 3 --psm 6"  # OCR Engine Mode 3, Page Segmentation Mode 6
+      confidence_threshold: 60   # Minimum confidence to accept results
+      preprocessing:
+        enhance_contrast: true
+        remove_noise: true
+        deskew: true
+    
+    cloud_vision:
+      # Google Cloud Vision API settings
+      credentials_path: "config/google_cloud_credentials.json"
+      language_hints: ["en"]
+      confidence_threshold: 70
+      features:
+        - "TEXT_DETECTION"
+        - "DOCUMENT_TEXT_DETECTION"
+    
+    hybrid:
+      # Intelligent routing between providers
+      low_confidence_threshold: 75    # Switch to cloud if tesseract < 75%
+      cost_limit_per_day: 5.00       # Max daily spend on cloud OCR ($)
+      prefer_local: true              # Try tesseract first
+      fallback_enabled: true          # Use tesseract if cloud unavailable
+      cost_per_image: 0.0015          # Google Cloud Vision pricing
+
+# Embedding settings for semantic search
+embeddings:
+  model_name: "all-MiniLM-L6-v2"    # Sentence transformer model
+  dimension: 384                     # Vector dimension
+  batch_size: 32                     # Batch processing size
+  cache_embeddings: true             # Cache computed embeddings
+
+# FAISS vector search settings
+faiss:
+  index_path: "data/faiss_index/"
+  index_type: "IndexFlatIP"          # Inner product similarity
+  rebuild_threshold: 100             # Rebuild index after N new embeddings
+  search_k: 5                        # Default number of results to return
+
+# Local LLM settings (Ollama)
+llm:
+  model: "llama3:latest"             # Use existing model
+  temperature: 0.7                   # Creativity vs consistency
+  max_tokens: 1000                   # Maximum response length
+  timeout: 120                       # Request timeout in seconds
+  system_prompt: |
+    You are a writing assistant helping to expand and develop handwritten notes into coherent content.
+    Maintain the original author's voice and style. Be concise but thorough.
+
+# Style corpus settings
+style:
+  corpus_path: "data/style_corpus/"
+  min_examples: 3                    # Minimum style examples needed
+  max_context_length: 2000          # Max chars to include in style context
+  similarity_threshold: 0.7          # Minimum similarity for style matching
+
+# Processing settings
+processing:
+  max_retries: 3                     # Retry failed operations
+  timeout_seconds: 30                # Default operation timeout
+  batch_size: 10                     # Process files in batches
+  watch_interval: 5                  # File watching interval (seconds)
+  
+# Logging configuration
+logging:
+  level: "INFO"                      # DEBUG, INFO, WARNING, ERROR
+  file_path: "data/logs/ghost_writer.log"
+  max_file_size: "10MB"
+  backup_count: 5
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Cost monitoring
+cost_monitoring:
+  daily_budget: 5.00                 # Daily budget limit ($)
+  alert_thresholds: [0.5, 0.75, 0.9] # Alert at 50%, 75%, 90% of budget
+  track_usage: true                  # Enable usage tracking
+  monthly_report: true               # Generate monthly cost reports
+
+# File processing
+files:
+  input_extensions: [".png", ".jpg", ".jpeg", ".note"]
+  watch_directories: ["data/notes/"]
+  archive_processed: true            # Move processed files to archive
+  archive_path: "data/archive/"
+  
+# Search settings
+search:
+  default_limit: 5                   # Default number of search results
+  min_similarity: 0.3               # Minimum similarity for results
+  include_metadata: true             # Include OCR provider info in results
+  fallback_to_text: true            # Use text search if vector search fails
