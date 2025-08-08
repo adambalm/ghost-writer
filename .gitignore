@@ -19,3 +19,7 @@ __pycache__/
 *.sqlite
 data/
 logs/
+
+# test backups
+*.bak
+*.broken.*
