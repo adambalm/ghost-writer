@@ -28,7 +28,6 @@ from src.utils.database import DatabaseManager
 class TestOCRBusinessLogic:
     """Test OCR provider business logic with comprehensive mocks"""
     
-@pytest.mark.xfail(strict=True, reason="Handoff for Claude Code: verify HybridOCR calls DatabaseManager.track_ocr_usage for the selected provider.")
     def test_confidence_based_provider_selection(self, temp_dir):
         """Test hybrid router selects providers based on confidence thresholds"""
         
@@ -48,7 +47,7 @@ class TestOCRBusinessLogic:
         mock_db.get_daily_ocr_cost.return_value = {}
         mock_db.track_ocr_usage.return_value = True
         
-        with patch('src.utils.database.DatabaseManager', return_value=mock_db), \
+        with patch('src.utils.ocr_providers.DatabaseManager', return_value=mock_db), \
              patch('src.utils.ocr_providers.config') as mock_config:
             
             mock_config.get.return_value = {
@@ -117,7 +116,7 @@ class TestOCRBusinessLogic:
             'gpt4_vision': {'cost': 0.8}  # Total: $2.3, over $2.0 limit
         }
         
-        with patch('src.utils.database.DatabaseManager', return_value=mock_db), \
+        with patch('src.utils.ocr_providers.DatabaseManager', return_value=mock_db), \
              patch('src.utils.ocr_providers.config') as mock_config:
             
             mock_config.get.return_value = {
@@ -160,7 +159,7 @@ class TestOCRBusinessLogic:
         mock_db = MagicMock()
         mock_db.get_daily_ocr_cost.return_value = {}
         
-        with patch('src.utils.database.DatabaseManager', return_value=mock_db), \
+        with patch('src.utils.ocr_providers.DatabaseManager', return_value=mock_db), \
              patch('src.utils.ocr_providers.config') as mock_config:
             
             mock_config.get.return_value = {
