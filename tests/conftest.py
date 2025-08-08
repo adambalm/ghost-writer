@@ -53,10 +53,15 @@ def test_config(temp_dir):
 
 @pytest.fixture
 def test_db(test_config, temp_dir):
-    """Create test database"""
-    db = DatabaseManager(str(temp_dir / "test.db"))
+    """Create test database with proper isolation"""
+    # Create unique database file for each test
+    import uuid
+    db_file = temp_dir / f"test_{uuid.uuid4().hex[:8]}.db"
+    db = DatabaseManager(str(db_file))
     yield db
-    # Cleanup is automatic when temp_dir is removed
+    # Cleanup database file after test
+    if db_file.exists():
+        db_file.unlink()
 
 
 @pytest.fixture
