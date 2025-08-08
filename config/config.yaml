@@ -19,22 +19,38 @@ ocr:
         remove_noise: true
         deskew: true
     
-    cloud_vision:
+    google_vision:
       # Google Cloud Vision API settings
       credentials_path: "config/google_cloud_credentials.json"
       language_hints: ["en"]
-      confidence_threshold: 70
+      confidence_threshold: 80
       features:
-        - "TEXT_DETECTION"
         - "DOCUMENT_TEXT_DETECTION"
+      cost_per_image: 0.0015
+    
+    gpt4_vision:
+      # OpenAI GPT-4 Vision API settings
+      api_key_env: "OPENAI_API_KEY"
+      model: "gpt-4o"
+      confidence_threshold: 85
+      max_tokens: 4000
+      cost_per_image: 0.01
+      system_prompt: |
+        You are a precise OCR system. Transcribe this handwritten text exactly as written.
+        Preserve the original structure, line breaks, and formatting.
+        If text is unclear, mark it with [unclear] but don't guess.
+        Do not add content that wasn't written.
     
     hybrid:
       # Intelligent routing between providers
-      low_confidence_threshold: 75    # Switch to cloud if tesseract < 75%
-      cost_limit_per_day: 5.00       # Max daily spend on cloud OCR ($)
-      prefer_local: true              # Try tesseract first
-      fallback_enabled: true          # Use tesseract if cloud unavailable
-      cost_per_image: 0.0015          # Google Cloud Vision pricing
+      provider_priority: ["tesseract", "google_vision", "gpt4_vision"]
+      confidence_thresholds:
+        tesseract: 75               # Switch if tesseract confidence < 75%
+        google_vision: 85           # Switch if google_vision confidence < 85%
+      cost_limit_per_day: 5.00     # Max daily spend on premium OCR ($)
+      prefer_local: true            # Try local providers first
+      fallback_enabled: true       # Always fall back to tesseract
+      quality_mode: "balanced"     # Options: "fast", "balanced", "premium"
 
 # Embedding settings for semantic search
 embeddings:

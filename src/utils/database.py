@@ -135,11 +135,12 @@ class DatabaseManager:
         """Update cleaned text for a note"""
         try:
             with self.get_connection() as conn:
-                conn.execute("""
+                cursor = conn.execute("""
                     UPDATE notes SET clean_text = ? WHERE note_id = ?
                 """, (clean_text, note_id))
                 conn.commit()
-                return True
+                # Return True only if a row was actually updated
+                return cursor.rowcount > 0
         except sqlite3.Error as e:
             logger.error(f"Error updating note {note_id}: {e}")
             return False

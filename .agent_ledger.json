@@ -1,0 +1,30 @@
+{
+  "last_updated": "2025-08-08T05:45:00Z",
+  "active_branch": "feat/ocr-routing-spec-v2",
+  "last_handoff": {
+    "from": "ChatGPT (Black Flag Protocol active)",
+    "to": "Claude Code CLI",
+    "date": "2025-08-08",
+    "reference_file": "CLAUDE_HANDOFF.md"
+  },
+  "key_context": [
+    "Tests fixed for test_confidence_based_provider_selection via correct patch target",
+    "All tests passing in tests/test_ocr_mocks.py",
+    "HybridOCR._get_provider_priority includes gpt4_vision branch; keep mocked unless env-gated",
+    "Cost tracking integrated inside hybrid loop"
+  ],
+  "next_steps": [
+    "Make tests/test_structure_generation.py pass",
+    "Add mocked E2E pipeline: OCR(mock) → relationships → concepts → structure",
+    "Add skipped API smoke tests gated by GOOGLE_APPLICATION_CREDENTIALS and OPENAI_API_KEY",
+    "Add ADR: ADRs/ADR-0003-mock-first-ocr-routing.md",
+    "Append to .agent_ledger.json and DECISION_HISTORY.md"
+  ],
+  "files_to_check": [
+    "CLAUDE_HANDOFF.md",
+    "DECISION_HISTORY.md",
+    "PRODUCT_SPECIFICATION.md",
+    "TESTING_STRATEGY.md",
+    ".agent_ledger.json"
+  ]
+}
