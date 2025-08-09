@@ -255,3 +255,6 @@ User Spec → Supervisor Agent → Spec Agent → Architecture Agent → Impleme
 - Success/failure pattern analysis for workflow optimization
 - Model assignment refinement based on cost-effectiveness metrics
 - Communication protocol optimization based on overhead analysis
+# Commit policy
+# 1) Max 7 files per commit, 300 lines diff (use multiple commits).
+# 2) Commit body must include: RISK:, ROLLBACK:, EVIDENCE: path(s) in .handoff/.
