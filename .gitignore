@@ -23,3 +23,7 @@ logs/
 # test backups
 *.bak
 *.broken.*
+
+# test backups
+*.bak
+*.broken.*
