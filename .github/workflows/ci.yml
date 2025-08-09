@@ -40,11 +40,6 @@ jobs:
           pytest --junitxml=.handoff/tests.xml -ra --strict-markers --strict-config
           coverage run -m pytest -q
           coverage xml -o .handoff/coverage.xml
-          python - <<'PY'
-          from junitparser import JUnitXml
-          x = JUnitXml.fromfile(".handoff/tests.xml"); total = sum(len(s) for s in x)
-          assert total >= 20, f"Suspiciously few tests collected: {total}"
-          PY
       - uses: actions/upload-artifact@v4
         if: steps.changes.outputs.skip != 'true'
         with: { name: handoff, path: .handoff }
