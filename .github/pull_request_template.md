@@ -1,0 +1,6 @@
+- [ ] Ran tools/agent_ci.sh and attached artifacts (.handoff/*)
+- [ ] tests.xml present; failures listed in PR body
+- [ ] coverage.xml present; % stated truthfully
+- [ ] ruff.txt has 0 issues
+- [ ] mypy.txt is clean or only documented ignores
+- [ ] Any code behavior change explained in 1–3 bullets

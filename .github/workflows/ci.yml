@@ -1,0 +1,13 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.10"}
+      - run: python -m venv .venv && source .venv/bin/activate && pip install -q --upgrade pip && pip install -q pytest coverage ruff==0.6.9 mypy==1.11.1 junitparser types-Pillow==10.2.0.20240520
+      - run: bash tools/agent_ci.sh
+      - uses: actions/upload-artifact@v4
+        with: {name: handoff, path: .handoff}

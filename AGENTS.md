@@ -13,7 +13,7 @@ It ensures continuity of work across suspensions, restarts, and model switches.
 ---
 
 ## Current Active Branch
-feat/ocr-routing-spec-v2
+fix/triage-pack-1
 
 ---
 

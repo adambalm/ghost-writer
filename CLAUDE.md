@@ -86,7 +86,7 @@ Documentation Agent: GPT-4.1 ($2/$8) - Fast, cost-effective documentation
 ### **Phase 1: Single-Agent Foundation** ✅ COMPLETED
 - ✅ Claude 4 Sonnet coordination established
 - ✅ Spec-driven development patterns implemented  
-- ✅ Complete Ghost Writer foundation built (85/85 tests passing)
+- ⚠️ Complete Ghost Writer foundation built (132/140 tests passing - 94%)
 - ✅ Performance baselines measured and scaling triggers identified
 
 ### **Phase 2: Multi-Agent Deployment** ✅ OPERATIONAL  
@@ -105,26 +105,26 @@ Documentation Agent: GPT-4.1 ($2/$8) - Fast, cost-effective documentation
 
 **Agent Coordination**:
 ```bash
-# Monitor agent performance and costs
-./scripts/monitor-agents.sh
+# Monitor agent performance via status files
+cat AGENT_STATUS.md
 
-# Scale up multi-agent team  
-./scripts/deploy-agents.sh --agents=3 --models=optimized
+# View current agent coordination state
+cat HANDOFF_ARTIFACTS.md
 
-# Generate agent performance report
-./scripts/agent-metrics.sh --period=daily
+# Check quality metrics and test results
+cat QUALITY_DASHBOARD.md
 ```
 
 **Development**:
 ```bash
-# Run spec validation across agents
-./scripts/validate-spec.sh
+# Run tests and generate reports
+python -m pytest tests/ -v --cov=src --cov-report=html
 
-# Execute multi-agent code review
-./scripts/agent-review.sh --file=<path>
+# Execute linting and type checking
+ruff check src/ && mypy src/ --ignore-missing-imports
 
-# Generate project documentation
-./scripts/generate-docs.sh --agents=all
+# Generate documentation
+# Use project README.md and .md files for documentation
 ```
 
 ## ARCHITECTURE ✅ OPERATIONAL
@@ -255,3 +255,6 @@ User Spec → Supervisor Agent → Spec Agent → Architecture Agent → Impleme
 - Success/failure pattern analysis for workflow optimization
 - Model assignment refinement based on cost-effectiveness metrics
 - Communication protocol optimization based on overhead analysis
+# Commit policy
+# 1) Max 7 files per commit, 300 lines diff (use multiple commits).
+# 2) Commit body must include: RISK:, ROLLBACK:, EVIDENCE: path(s) in .handoff/.
