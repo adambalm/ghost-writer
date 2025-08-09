@@ -133,23 +133,76 @@ def debug_supernote_connection():
                         # Test 4: File listing
                         print("4️⃣ Testing file listing...")
                         files_url = f"{base_url}/file/list/query"
+                        # First check root folder
                         files_payload = {
-                            "token": token,
-                            "directoryId": "0"
+                            "directoryId": "0",
+                            "pageNo": 1,
+                            "pageSize": 50,
+                            "order": "time",
+                            "sequence": "desc"
                         }
                         
-                        files_response = requests.post(files_url, json=files_payload, timeout=10)
+                        # Token goes in headers, not payload
+                        files_headers = {
+                            "x-access-token": token,
+                            "Content-Type": "application/json"
+                        }
+                        
+                        files_response = requests.post(files_url, json=files_payload, headers=files_headers, timeout=10)
                         print(f"   Status code: {files_response.status_code}")
                         
                         if files_response.ok:
                             files_data = files_response.json()
+                            print(f"   Raw response: {files_data}")
+                            
                             if files_data.get("success"):
-                                files = files_data.get("data", [])
-                                print(f"   ✅ Found {len(files)} files in your cloud!")
+                                # The files are in userFileVOList, not data
+                                files = files_data.get("userFileVOList", [])
+                                total = files_data.get("total", 0)
                                 
-                                for i, file in enumerate(files[:3]):
-                                    print(f"      - {file.get('fileName', 'Unknown')}")
+                                print(f"   ✅ Found {len(files)} items (total: {total})")
                                 
+                                folders = [f for f in files if f.get('isFolder') == 'Y']
+                                note_files = [f for f in files if f.get('isFolder') != 'Y']
+                                
+                                print(f"   📁 Folders: {len(folders)}")
+                                print(f"   📝 Files: {len(note_files)}")
+                                
+                                # Show folders first
+                                for folder in folders:
+                                    print(f"      📁 {folder.get('fileName')} (ID: {folder.get('id')})")
+                                
+                                # Show files
+                                for file in note_files:
+                                    print(f"      📄 {file.get('fileName')}")
+                                
+                                # Now check inside the "Note" folder where .note files likely are
+                                note_folder = next((f for f in folders if f.get('fileName') == 'Note'), None)
+                                if note_folder:
+                                    print(f"\n5️⃣ Checking inside 'Note' folder...")
+                                    note_folder_id = note_folder.get('id')
+                                    
+                                    note_folder_payload = {
+                                        "directoryId": note_folder_id,
+                                        "pageNo": 1,
+                                        "pageSize": 50,
+                                        "order": "time",
+                                        "sequence": "desc"
+                                    }
+                                    
+                                    note_folder_response = requests.post(files_url, json=note_folder_payload, headers=files_headers, timeout=10)
+                                    
+                                    if note_folder_response.ok:
+                                        note_folder_data = note_folder_response.json()
+                                        if note_folder_data.get("success"):
+                                            note_files_list = note_folder_data.get("userFileVOList", [])
+                                            print(f"   ✅ Found {len(note_files_list)} files in Note folder!")
+                                            
+                                            for i, file in enumerate(note_files_list[:5]):
+                                                is_folder = file.get('isFolder') == 'Y'
+                                                icon = "📁" if is_folder else "📝"
+                                                print(f"      {icon} {file.get('fileName')}")
+                                        
                                 print("\n🎉 SUCCESS! Everything is working!")
                                 print("\nYour Supernote Cloud integration is ready to use!")
                                 return

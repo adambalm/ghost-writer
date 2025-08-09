@@ -230,15 +230,25 @@ class SupernoteCloudAPI:
             return []
         
         try:
-            # Use the proven API payload structure
+            # Use the proven API payload structure with correct parameter names
             payload = {
-                "token": self.credentials.access_token,
-                "directoryId": directory_id
+                "directoryId": directory_id,
+                "pageNo": 1,
+                "pageSize": 100,
+                "order": "time",
+                "sequence": "desc"
+            }
+            
+            # Token goes in headers as x-access-token
+            headers = {
+                "x-access-token": self.credentials.access_token,
+                "Content-Type": "application/json"
             }
             
             response = self.session.post(
                 f"{self.BASE_URL}{self.ENDPOINTS['file_list']}",
-                json=payload
+                json=payload,
+                headers=headers
             )
             
             if not response.ok:
@@ -251,8 +261,21 @@ class SupernoteCloudAPI:
                 logger.error(f"File list request unsuccessful: {result.get('errorMsg', 'Unknown error')}")
                 return []
             
-            files_data = result.get("data", [])
-            return [self._parse_file_info(file_data) for file_data in files_data]
+            # Files are in userFileVOList, not data
+            files_data = result.get("userFileVOList", [])
+            
+            # Filter out folders, only return actual files
+            actual_files = [f for f in files_data if f.get('isFolder') != 'Y']
+            
+            # If we're looking at root and find the Note folder, also get files from there
+            if directory_id == "0":
+                note_folder = next((f for f in files_data if f.get('fileName') == 'Note' and f.get('isFolder') == 'Y'), None)
+                if note_folder:
+                    logger.info("Found Note folder, fetching files from it...")
+                    note_files = self.list_files(note_folder.get('id'))
+                    actual_files.extend(note_files)
+            
+            return [self._parse_file_info(file_data) for file_data in actual_files]
                 
         except Exception as e:
             logger.error(f"Failed to list files: {e}")
@@ -313,13 +336,19 @@ class SupernoteCloudAPI:
         try:
             # Step 1: Get download URL using proven API method
             payload = {
-                "token": self.credentials.access_token,
                 "id": file.file_id
+            }
+            
+            # Token goes in headers as x-access-token
+            headers = {
+                "x-access-token": self.credentials.access_token,
+                "Content-Type": "application/json"
             }
             
             url_response = self.session.post(
                 f"{self.BASE_URL}{self.ENDPOINTS['download_url']}",
-                json=payload
+                json=payload,
+                headers=headers
             )
             
             if not url_response.ok:
