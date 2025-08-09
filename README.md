@@ -1,9 +1,9 @@
 # Ghost Writer v2.0 - Multi-Agent Handwritten Note Intelligence
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-85%20passing-brightgreen.svg)](https://pytest.org/)
+[![Tests](https://img.shields.io/badge/tests-132%20passed%2C%208%20failed-yellow.svg)](https://pytest.org/)
 [![Multi-Agent](https://img.shields.io/badge/architecture-multi--agent-purple.svg)](CLAUDE.md)
-[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](pytest.ini)
+[![Coverage](https://img.shields.io/badge/coverage-79%25-orange.svg)](pytest.ini)
 
 ## 🚀 **SYSTEM OPERATIONAL** - Complete Multi-Agent Handwritten Note Processing
 
@@ -14,7 +14,7 @@
 - ✅ **Complete Multi-Agent Architecture** - Document-based coordination system deployed
 - ✅ **Hybrid OCR Pipeline** - Tesseract + Google Vision + GPT-4 Vision with intelligent routing
 - ✅ **Idea Organization Engine** - Relationship detection, concept clustering, structure generation  
-- ✅ **100% Test Coverage** - 85/85 tests passing with comprehensive integration testing
+- ⚠️ **Test Coverage** - 132/140 tests passing (79% coverage) with comprehensive integration testing
 - ✅ **Privacy & Cost Controls** - Local-first processing with automatic budget management
 - ✅ **Production Ready** - Complete system ready for deployment
 
@@ -164,7 +164,7 @@ print(f"Generated: {result}")
 
 ### **Comprehensive Test Suite**
 ```bash
-# Run full test suite (85 tests)
+# Run full test suite (140 tests)
 python -m pytest tests/ -v
 
 # Run specific test categories
@@ -178,7 +178,7 @@ python -m pytest tests/test_e2e_integration.py::TestPerformanceAndScaling -v
 ```
 
 ### **Quality Metrics**
-- **Test Success Rate**: 100% (85/85 tests passing)
+- **Test Success Rate**: 94% (132/140 tests passing)
 - **Integration Coverage**: Complete E2E pipeline validation
 - **Performance**: <30s OCR processing, <10s idea organization
 - **Reliability**: Comprehensive error handling and fallback mechanisms
@@ -249,7 +249,7 @@ GHOST_WRITER_DB_PATH=data/ghost_writer.db
 | Concept Clustering | <5s per page | ✅ Achieved |
 | Structure Generation | <5s per page | ✅ Achieved |
 | Database Operations | <100ms | ✅ Achieved |
-| Test Suite Execution | ~99s (85 tests) | ✅ Achieved |
+| Test Suite Execution | ~113s (140 tests) | ✅ Achieved |
 
 ## 🤖 **Multi-Agent System**
 

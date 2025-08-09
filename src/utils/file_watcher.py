@@ -5,7 +5,7 @@ File Watcher utility for monitoring directories for new Supernote files
 import logging
 import time
 from pathlib import Path
-from typing import Callable, Set
+from typing import Callable, Set, List
 from threading import Thread, Event
 
 from watchdog.observers import Observer
