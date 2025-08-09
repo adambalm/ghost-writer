@@ -8,7 +8,7 @@ from pathlib import Path
 import tempfile
 import os
 
-from src.cli import on_file_added
+# Note: on_file_added is a nested function in the watch command, so we test the logic separately
 
 
 @pytest.mark.unit
