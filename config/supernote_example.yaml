@@ -1,0 +1,53 @@
+# Example Supernote Cloud Integration Configuration
+#
+# Copy this to your main config.yaml and update with your credentials
+
+supernote:
+  # Enable Supernote Cloud integration
+  enabled: true
+  
+  # Your Supernote account credentials
+  email: "your.email@example.com"
+  password: "your_supernote_password"
+  
+  # Optional: Access token (will be automatically obtained and stored)
+  access_token: ""
+  
+  # Sync settings
+  sync_interval: 3600                    # Sync every hour (in seconds)
+  local_sync_dir: "data/supernote_sync/" # Where to store synced files
+  
+  # Processing options
+  auto_process: true                     # Automatically process downloaded files
+  file_types: ["note", "pdf"]            # Which file types to sync
+  
+  # Advanced options
+  max_files_per_sync: 50                 # Limit files per sync operation
+  retry_failed_downloads: true           # Retry failed downloads
+  keep_original_structure: true          # Preserve cloud folder structure locally
+
+# Enhanced file processing for Supernote files
+files:
+  input_extensions: [".png", ".jpg", ".jpeg", ".note", ".pdf"]
+  watch_directories: 
+    - "data/notes/"
+    - "data/supernote_sync/"  # Watch synced files
+  archive_processed: true
+  archive_path: "data/archive/"
+
+# OCR optimization for Supernote files
+ocr:
+  # Use premium OCR for better handwriting recognition
+  hybrid:
+    quality_mode: "premium"              # Best quality for handwritten notes
+    cost_limit_per_day: 10.00           # Higher budget for Supernote processing
+    prefer_local: false                  # Use cloud OCR for better accuracy
+
+# Workflow automation
+automation:
+  # Automatically sync and process new Supernote files
+  supernote_workflow:
+    enabled: true
+    sync_schedule: "0 */2 * * *"         # Every 2 hours (cron format)
+    process_formats: ["markdown", "pdf"] # Output formats for processed files
+    notification_email: ""               # Optional: email for sync reports

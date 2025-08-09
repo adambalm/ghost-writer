@@ -9,11 +9,21 @@ Pillow>=10.0.0
 numpy>=1.24.0
 python-dotenv>=1.0.0
 
+# CLI and file processing
+watchdog>=3.0.0
+rich>=13.0.0
+reportlab>=4.0.0
+
 # Testing and debugging
 pytest>=7.0.0
 pytest-cov>=4.0.0
 pytest-mock>=3.0.0
 pytest-asyncio>=0.21.0
+
+# Code quality and linting
+black>=23.0.0
+flake8>=6.0.0
+pre-commit>=3.0.0
 
 # PyYAML==6.0.1 - already installed system-wide
 # click==8.1.6 - already installed system-wide  

@@ -78,39 +78,86 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
+# Initialize Ghost Writer
+ghost-writer init
+
 # Verify installation
 python -m pytest tests/ --tb=short -q
 ```
 
-### **Basic Usage**
+### **Command Line Usage**
+
+**Process a single file:**
+```bash
+# Process an image file
+ghost-writer process my_notes.png
+
+# Process a Supernote .note file
+ghost-writer process my_notebook.note --format all
+
+# Process with premium quality
+ghost-writer process notes.jpg --quality premium --format pdf
+```
+
+**Process a directory:**
+```bash
+# Process all images in a directory
+ghost-writer process notes_folder/ --output processed_notes/
+
+# Local-only processing (no cloud APIs)
+ghost-writer process notes/ --local-only --format markdown
+```
+
+**Watch directory for new files:**
+```bash
+# Automatically process new files
+ghost-writer watch notes_folder/ --format all --interval 5
+```
+
+**Sync from Supernote Cloud:**
+```bash
+# Sync recent notes (requires configuration)
+ghost-writer sync --since 2025-01-01 --output supernote_notes/
+```
+
+**Check system status:**
+```bash
+ghost-writer status
+```
+
+### **Basic API Usage**
 ```python
+from src.cli import process_single_file
 from src.utils.ocr_providers import HybridOCR
 from src.utils.relationship_detector import RelationshipDetector
 from src.utils.concept_clustering import ConceptExtractor, ConceptClusterer
 from src.utils.structure_generator import StructureGenerator
+from src.utils.database import DatabaseManager
+from pathlib import Path
 
-# Initialize OCR pipeline
+# Initialize components
 ocr = HybridOCR()
-result = ocr.extract_text("handwritten_notes.jpg")
-
-# Process through idea organization pipeline
 detector = RelationshipDetector()
-elements = create_note_elements_from_ocr(result)
-relationships = detector.detect_relationships(elements)
-
 extractor = ConceptExtractor()
-concepts = extractor.extract_concepts(elements)
-
 clusterer = ConceptClusterer()
-clusters = clusterer.cluster_concepts(concepts, relationships)
-
 generator = StructureGenerator()
-structures = generator.generate_structures(elements, concepts, clusters, relationships)
+db = DatabaseManager()
 
-# Export best structure
-best_structure = max(structures, key=lambda s: s.confidence)
-formatted_document = generator.export_structure_as_text(best_structure)
-print(formatted_document)
+# Process a file
+result = process_single_file(
+    file_path=Path("my_notes.jpg"),
+    ocr_provider=ocr,
+    relationship_detector=detector,
+    concept_extractor=extractor,
+    concept_clusterer=clusterer,
+    structure_generator=generator,
+    db_manager=db,
+    output_dir=Path("output/"),
+    output_format="markdown",
+    quality="balanced"
+)
+
+print(f"Generated: {result}")
 ```
 
 ## 🧪 **Testing & Quality**
@@ -263,10 +310,39 @@ See [CLAUDE.md](CLAUDE.md) for complete multi-agent development protocols and ar
 4. Ensure 100% test success rate
 5. Update relevant .md documentation files
 
+## 📱 **Supernote Integration**
+
+### **Production-Ready Supernote Cloud Sync**
+
+Ghost Writer includes **fully operational Supernote integration** with real API authentication and file synchronization.
+
+**Quick Test:**
+```bash
+# Test your Supernote Cloud connection
+python debug_supernote_test.py
+# Enter phone number: 4139491742 (or your number)
+# Enter password: [your Supernote Cloud password]
+```
+
+**Features:**
+- ✅ **Real API Integration**: Authenticated connection to Supernote Cloud
+- ✅ **Phone Number Login**: Support for phone-based authentication  
+- ✅ **Secure Authentication**: MD5+SHA256 hashing with random salt
+- ✅ **File Synchronization**: Download .note files directly from cloud
+- ✅ **Binary .note Parsing**: Extract vector graphics for OCR processing
+- ✅ **HTTPS Security**: All communication encrypted, no plaintext passwords
+
+**Quick Start:**
+1. **Test Connection**: `python debug_supernote_test.py`
+2. **Sync Files**: `ghost-writer sync --output ~/Downloads/`
+3. **Process Notes**: `ghost-writer process downloaded_file.note --format markdown`
+
+See [QUICK_START.md](QUICK_START.md) for detailed setup instructions.
+
 ## 📄 **License**
 
 MIT License - see LICENSE file for details.
 
 ---
 
-**Ghost Writer v2.0** - Transform handwritten notes into structured intelligence with multi-agent AI coordination.
+**Ghost Writer v2.0** - Transform handwritten notes into structured intelligence with multi-agent AI coordination and **live Supernote Cloud integration**.

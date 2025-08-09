@@ -111,6 +111,19 @@ files:
   watch_directories: ["data/notes/"]
   archive_processed: true            # Move processed files to archive
   archive_path: "data/archive/"
+
+# Supernote Cloud Integration
+supernote:
+  enabled: false                     # Enable Supernote Cloud sync
+  email: ""                         # Your Supernote account email
+  password: ""                      # Your Supernote account password (optional if using tokens)
+  access_token: ""                  # Access token (obtained after first login)
+  refresh_token: ""                 # Refresh token for automatic token renewal
+  device_id: ""                     # Device ID (auto-generated if not provided)
+  sync_interval: 3600               # Sync interval in seconds (1 hour)
+  local_sync_dir: "data/supernote_sync/"  # Local directory for synced files
+  auto_process: true                # Automatically process downloaded files
+  file_types: ["note", "pdf"]       # File types to sync from cloud
   
 # Search settings
 search:
