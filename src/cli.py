@@ -447,9 +447,37 @@ def watch(ctx, directory: str, output: Optional[str], interval: int, format: str
     
     def on_file_added(file_path: Path):
         console.print(f"📄 New file detected: {file_path.name}")
-        # Process the file using the same logic as process command
-        # This would call process_single_file with the same components
-        console.print(f"✅ Processed: {file_path.name}")
+        try:
+            # Initialize components
+            from .utils.ocr_providers import HybridOCR
+            from .utils.relationship_detector import RelationshipDetector
+            from .utils.concept_clustering import ConceptExtractor, ConceptClusterer
+            from .utils.structure_generator import StructureGenerator
+            from .utils.database import DatabaseManager
+            
+            ocr_provider = HybridOCR()
+            detector = RelationshipDetector()
+            extractor = ConceptExtractor()
+            clusterer = ConceptClusterer()
+            generator = StructureGenerator()
+            db_manager = DatabaseManager()
+            
+            # Process the file
+            result = process_single_file(
+                file_path=file_path,
+                ocr_provider=ocr_provider,
+                relationship_detector=detector,
+                concept_extractor=extractor,
+                concept_clusterer=clusterer,
+                structure_generator=generator,
+                db_manager=db_manager,
+                output_dir=output_dir,
+                output_format=format,
+                quality="balanced"
+            )
+            console.print(f"✅ Processed: {file_path.name} -> {result}")
+        except Exception as e:
+            console.print(f"❌ Error processing {file_path.name}: {e}")
     
     watcher = FileWatcher(directory_path, on_file_added, interval)
     
