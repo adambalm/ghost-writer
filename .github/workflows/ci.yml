@@ -1,13 +1,29 @@
 name: ci
 on: [push, pull_request]
 jobs:
-  test:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: {python-version: "3.10"}
+        with: { python-version: "3.10" }
       - run: python -m venv .venv && source .venv/bin/activate && pip install -q --upgrade pip && pip install -q pytest coverage ruff==0.6.9 mypy==1.11.1 junitparser types-Pillow==10.2.0.20240520
-      - run: bash tools/agent_ci.sh
+      - name: run tests strictly
+        run: |
+          set -euo pipefail
+          source .venv/bin/activate
+          mkdir -p .handoff
+          # fail on config/marker issues; produce JUnit
+          pytest --junitxml=.handoff/tests.xml -ra --strict-markers --strict-config
+          # coverage (still fails if tests fail above)
+          coverage run -m pytest -q
+          coverage xml -o .handoff/coverage.xml
+          # guard against "all skipped"
+          python - <<'PY'
+          from junitparser import JUnitXml
+          x = JUnitXml.fromfile(".handoff/tests.xml")
+          total = sum(len(s) for s in x)
+          assert total >= 20, f"Suspiciously few tests collected: {total}"
+          PY
       - uses: actions/upload-artifact@v4
-        with: {name: handoff, path: .handoff}
+        with: { name: handoff, path: .handoff }
