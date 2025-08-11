@@ -10,6 +10,7 @@ Authentication and API endpoints tested with Supernote A6X2 "Nomad" devices.
 import logging
 import hashlib
 import json
+import os
 import random
 import time
 from pathlib import Path
@@ -454,21 +455,24 @@ def create_supernote_client(config: Dict[str, Any]) -> Optional[SupernoteCloudAP
     """
     
     supernote_config = config.get('supernote', {})
-    
+
     if not supernote_config.get('enabled', False):
         logger.info("Supernote Cloud integration is disabled")
         return None
-    
+
+    def _get_env(name: str) -> str:
+        return os.environ.get(name, '')
+
     credentials = SupernoteCredentials(
-        email=supernote_config.get('email', ''),
-        password=supernote_config.get('password', ''),
-        access_token=supernote_config.get('access_token', ''),
-        refresh_token=supernote_config.get('refresh_token', ''),
-        device_id=supernote_config.get('device_id', '')
+        email=_get_env(supernote_config.get('email_env', 'SUPERNOTE_EMAIL')),
+        password=_get_env(supernote_config.get('password_env', 'SUPERNOTE_PASSWORD')),
+        access_token=_get_env(supernote_config.get('access_token_env', 'SUPERNOTE_ACCESS_TOKEN')),
+        refresh_token=_get_env(supernote_config.get('refresh_token_env', 'SUPERNOTE_REFRESH_TOKEN')),
+        device_id=_get_env(supernote_config.get('device_id_env', 'SUPERNOTE_DEVICE_ID'))
     )
-    
-    if not credentials.email:
-        logger.warning("No Supernote email configured")
+
+    if not credentials.email or not (credentials.password or credentials.access_token):
+        logger.warning("Supernote credentials not configured in environment variables")
         return None
     
     client = SupernoteCloudAPI(credentials)

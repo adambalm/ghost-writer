@@ -3,12 +3,11 @@
 Quick Supernote Cloud test - minimal setup required
 
 This script tests your Supernote connection with minimal configuration.
-Just run it and enter your credentials when prompted.
+Set SUPERNOTE_EMAIL and SUPERNOTE_PASSWORD environment variables before running.
 """
 
 import os
 import sys
-from getpass import getpass
 from pathlib import Path
 
 # Add the src directory to Python path
@@ -21,19 +20,12 @@ def test_supernote_connection():
     print("=" * 40)
     print()
     
-    # Get credentials securely
-    print("Enter your Supernote Cloud credentials:")
-    email = input("📧 Email: ").strip()
-    
-    if not email:
-        print("❌ Email required")
-        return
-    
-    # Use getpass to hide password input
-    password = getpass("🔐 Password: ")
-    
-    if not password:
-        print("❌ Password required")
+    # Get credentials from environment
+    email = os.environ.get("SUPERNOTE_EMAIL", "").strip()
+    password = os.environ.get("SUPERNOTE_PASSWORD", "")
+
+    if not email or not password:
+        print("❌ SUPERNOTE_EMAIL and SUPERNOTE_PASSWORD must be set in the environment")
         return
     
     print("\n🔄 Testing connection to Supernote Cloud...")
