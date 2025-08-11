@@ -1,38 +1,133 @@
-# Claude Handoff — ghost-writer
+# CLAUDE_HANDOFF
 
-## Branch
-`ocr-mock-patch`
+**Timestamp (UTC):** 20250810T212013Z  
+**Branch:** chore/ignore-handoff  
+**HEAD:** 41cbe89
 
-## Summary of work done
-- Restored `tests/test_ocr_mocks.py` from backup due to broken `@pytest.mark.xfail` insertion.
-- Fixed incorrect patch target from `src.utils.database.DatabaseManager` → `src.utils.ocr_providers.DatabaseManager`.
-- All OCR mock tests now pass (`pytest -q tests/test_ocr_mocks.py` → 10 passed, 2 warnings).
-- **Key insight:** `HybridOCR._get_provider_priority` includes `tesseract`, `google_vision`, and `gpt4_vision` when configured — but scoring branch for `gpt4_vision` exists only if env vars are set. Currently env-gated and mocked.
-
-## State now
-- **Mock-first**: No external Google/OpenAI calls. Tesseract local is fine.
-- **Budget**: Later, do one-call smoke per provider only if env vars exist.
-- **Patching**: Mock DB as `src.utils.ocr_providers.DatabaseManager`.
-
-## Next tasks (in order)
-1. Make `tests/test_structure_generation.py` pass.
-2. Add one **E2E mocked pipeline**: OCR(mock) → relationships → concepts → structure.
-3. Add **skipped API smoke tests** gated by `GOOGLE_APPLICATION_CREDENTIALS` and `OPENAI_API_KEY`.
-4. Add ADR: `ADRs/ADR-0003-mock-first-ocr-routing.md`.
-5. Append to `.agent_ledger.json` and `DECISION_HISTORY.md`.
-
-## How to resume
-```bash
-source venv/bin/activate
-pytest -q tests/test_structure_generation.py
+## Working tree
+```
+## chore/ignore-handoff...origin/chore/ignore-handoff
+ M AGENTS.md
+ M AGENT_STATUS.md
+ M CLAUDE.md
+MM CLAUDE_HANDOFF.md
+ M HANDOFF_ARTIFACTS.md
+ M PRODUCT_SPECIFICATION.md
+ M QUALITY_DASHBOARD.md
+ M README.md
+ M TASK_BREAKDOWN.md
+AM handoff.patch
+?? --list-langs.txt
+?? .coverage
+?? .githooks/
+?? .github/workflows/budget.yml
+?? v0.1.1-pre-codex-20250809-0350
 ```
 
-## Notes / gotchas
-- `HybridOCR._get_provider_priority` includes `gpt4_vision` when configured; scoring branches exist. Keep it mocked unless env-gated.
-- Cost tracking occurs inside the hybrid loop; mocks now cover the selected-provider path.
+## Unpushed commits
+```
 
-## Pointers
-- DECISION_HISTORY.md
-- PRODUCT_SPECIFICATION.md
-- TESTING_STRATEGY.md
-- .agent_ledger.json
+```
+
+## Changed files (summary)
+```
+M	AGENTS.md
+M	AGENT_STATUS.md
+M	CLAUDE.md
+M	CLAUDE_HANDOFF.md
+M	HANDOFF_ARTIFACTS.md
+M	PRODUCT_SPECIFICATION.md
+M	QUALITY_DASHBOARD.md
+M	README.md
+M	TASK_BREAKDOWN.md
+M	handoff.patch
+M	CLAUDE_HANDOFF.md
+A	handoff.patch
+```
+
+## Current task: Clean up promotional markdown files
+(If TASK_BREAKDOWN.md exists, the first 200 lines are embedded below.)
+
+```
+# TASK BREAKDOWN - Development Planning
+
+**Status**: In Progress
+**Phase**: Development Phase 2
+**Date**: 2025-08-08  
+
+## Current System State
+
+**Baseline Performance**:
+- Single-agent tests: 78/81 passed (96.3% success rate)
+- Failed tests: 3 E2E integration tests (API dependencies)
+- Core components: All unit tests passing ✅
+- Test coverage: >95% on core functionality
+
+**Architecture Status**:
+- 6k+ lines of code across OCR, NLP, structure generation
+- Database layer: Fully functional with SQLite
+- OCR providers: HybridOCR with fallback mechanisms  
+- Testing framework: Comprehensive pytest suite with fixtures
+
+## Development Plan
+
+### 1. Quality Assurance Focus
+**Responsibility**: Cross-component testing, integration validation
+**Tasks**:
+- Fix failing E2E integration tests
+- Maintain test coverage at baseline level
+- Create integration test frameworks
+- Validate system handoffs
+
+### 2. Implementation Development
+**Responsibility**: Coding, feature development, component tests
+**Tasks**:
+- Component development and maintenance
+- Unit test creation and updates
+- Code review and optimization
+- Feature implementation
+
+### 3. Documentation Protocol
+**Document-Based Tracking**:
+- AGENT_STATUS.md: Current development status and tasks
+- HANDOFF_ARTIFACTS.md: Development coordination log
+- PERFORMANCE_METRICS.md: Performance and efficiency tracking
+- QUALITY_DASHBOARD.md: Test results and coverage
+
+## Success Criteria
+
+**Technical Requirements**:
+- [ ] Development workflow established and functional
+- [ ] Test coverage maintained at baseline level
+- [ ] Development coordination efficient
+- [ ] Failed tests reduced from 3 to 1 or fewer
+
+**Quality Assurance**:
+- [ ] Document-based development protocols working
+- [ ] Development coordination artifacts maintained
+- [ ] Performance monitoring dashboard active
+- [ ] Fallback development capability preserved
+
+## Risk Mitigation
+
+**Development Coordination Issues**:
+- Fallback to simplified development mode
+- All development outputs logged for review
+- Intervention triggers at performance degradation
+
+**Quality Degradation**:
+- Test suite must maintain baseline performance
+- Development confidence tracking for task assignment
+- Escalation on failure rate >15%
+
+---
+
+**Next Action**: Address E2E integration test failures
+**Development Protocol**: Document-based artifacts for coordination
+**Monitoring**: Performance tracking initiated
+```
+
+## Next tasks (authoritative)
+- [ ] Continue cleanup exactly where it left off
+- [ ] Apply handoff.patch where appropriate (do not duplicate changes)
+- [ ] Verify deletions and commit
