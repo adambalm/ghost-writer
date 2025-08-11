@@ -109,7 +109,7 @@ class TestCLI:
         assert result.exit_code == 0
         assert "No supported files found" in result.output
     
-    @patch('src.cli.convert_note_to_images')
+    @patch('src.utils.supernote_parser.convert_note_to_images')
     @patch('src.cli.HybridOCR')
     @patch('src.cli.DatabaseManager')
     def test_process_note_file(self, mock_db, mock_ocr, mock_convert):
@@ -290,6 +290,10 @@ class TestSingleFileProcessing:
         mock_cluster.cluster_concepts.return_value = []
         mock_struct.generate_structures.return_value = []
         
+        # Create output directory
+        output_dir = self.temp_dir / "output"
+        output_dir.mkdir(exist_ok=True)
+        
         result = process_single_file(
             file_path=test_file,
             ocr_provider=mock_ocr,
@@ -298,7 +302,7 @@ class TestSingleFileProcessing:
             concept_clusterer=mock_cluster,
             structure_generator=mock_struct,
             db_manager=mock_db,
-            output_dir=self.temp_dir / "output",
+            output_dir=output_dir,
             output_format="markdown",
             quality="balanced"
         )
