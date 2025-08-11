@@ -193,7 +193,7 @@ class TestFileExports:
         content = output_file.read_text()
         assert "Test handwritten content" in content
         assert "gpt4_vision" in content
-        assert "92%" in content
+        assert "92.00%" in content
     
     def test_export_as_json(self):
         """Test JSON export functionality"""

@@ -79,11 +79,14 @@ def process(ctx, input_path: str, output: Optional[str], format: str,
     
     # Find files to process
     files_to_process = []
+    supported_extensions = {".png", ".jpg", ".jpeg", ".note", ".pdf"}
+    
     if input_path.is_file():
-        files_to_process = [input_path]
+        # Check if single file has supported extension
+        if input_path.suffix.lower() in supported_extensions:
+            files_to_process = [input_path]
     else:
-        # Find supported file types
-        supported_extensions = {".png", ".jpg", ".jpeg", ".note", ".pdf"}
+        # Find supported file types in directory
         for ext in supported_extensions:
             files_to_process.extend(input_path.glob(f"**/*{ext}"))
     
