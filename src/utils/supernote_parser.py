@@ -148,6 +148,9 @@ class SupernoteParser:
         """Fallback parser that attempts to extract basic structure"""
         logger.warning("Using fallback parser - limited functionality")
         
+        # Smart content detection - look for actual meaningful data
+        has_content = self._detect_content_in_data(data)
+        
         # Create a single page with basic metadata
         page = SupernotePage(
             page_id=0,
@@ -157,11 +160,53 @@ class SupernoteParser:
             metadata={
                 "parser": "fallback",
                 "file_size": len(data),
-                "has_content": len(data) > 1000
+                "has_content": has_content
             }
         )
         
         return [page]
+    
+    def _detect_content_in_data(self, data: bytes) -> bool:
+        """
+        Smart content detection - looks for actual meaningful data rather than just file size.
+        Returns True if the data appears to contain actual note content.
+        """
+        if len(data) < 16:  # Too small to be a valid note file
+            return False
+            
+        # Check for data beyond just header/magic bytes
+        # Look for patterns that suggest actual content:
+        
+        # 1. Check for sufficient data beyond known headers
+        known_headers = [b"SNSV", b"NOTE", b"UNKNOWN_FORMAT"]
+        min_content_size = 0
+        for header in known_headers:
+            if data.startswith(header):
+                min_content_size = len(header) + 8  # Header + some metadata
+                break
+        
+        if len(data) <= min_content_size:
+            return False
+            
+        # 2. Look for patterns that suggest stroke data or content
+        # Check for non-zero bytes in the data portion (after headers)
+        content_portion = data[min_content_size:]
+        non_zero_bytes = sum(1 for byte in content_portion if byte != 0)
+        
+        # If more than 10% of content portion has non-zero bytes, likely has content
+        if len(content_portion) > 0 and (non_zero_bytes / len(content_portion)) > 0.1:
+            return True
+            
+        # 3. Check for repeated patterns that might indicate stroke data
+        # Simple heuristic: if we see varied byte values, it's likely content
+        if len(set(content_portion[:100])) > 10:  # Check first 100 bytes for variety
+            return True
+            
+        # 4. Fallback: if file is reasonably sized and not all zeros/same byte
+        if len(data) > 50 and len(set(data)) > 5:
+            return True
+            
+        return False
     
     def render_page_to_image(self, 
                            page: SupernotePage, 
