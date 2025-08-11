@@ -44,7 +44,6 @@ jobs:
           pip install -q -r requirements.txt
           mkdir -p .handoff
           pytest --junitxml=.handoff/tests.xml -ra --strict-markers --strict-config
-          coverage run -m pytest -q
           coverage xml -o .handoff/coverage.xml
       - uses: actions/upload-artifact@v4
         if: steps.changes.outputs.skip != 'true'
