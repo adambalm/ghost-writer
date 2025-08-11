@@ -10,8 +10,8 @@ source venv/bin/activate
 python quick_supernote_test.py
 ```
 
-**What this does:**
-- Asks for your Supernote email/password
+- **What this does:**
+- Uses `SUPERNOTE_EMAIL` and `SUPERNOTE_PASSWORD` environment variables
 - Tests authentication with real API
 - Shows your files from the cloud
 - Confirms everything is working
@@ -46,8 +46,8 @@ Your handwritten notes are now:
 
 ## If Something Goes Wrong
 
-**Connection issues:**
-- Check your email/password
+- **Connection issues:**
+- Check your `SUPERNOTE_EMAIL` and `SUPERNOTE_PASSWORD`
 - Make sure you can log into cloud.supernote.com in browser
 
 **No files found:**

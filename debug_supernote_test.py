@@ -6,7 +6,6 @@ Debug Supernote Cloud connection - detailed error reporting
 import os
 import sys
 import json
-from getpass import getpass
 from pathlib import Path
 
 # Add the src directory to Python path
@@ -19,20 +18,21 @@ def debug_supernote_connection():
     print("=" * 50)
     print()
     
-    # Get credentials
-    print("Enter your Supernote Cloud credentials:")
-    email = input("📧 Email: ").strip()
-    password = getpass("🔐 Password: ")
-    
+    # Get credentials from environment
+    email = os.environ.get("SUPERNOTE_EMAIL", "").strip()
+    password = os.environ.get("SUPERNOTE_PASSWORD", "")
+
+    if not email or not password:
+        print("❌ SUPERNOTE_EMAIL and SUPERNOTE_PASSWORD must be set in the environment")
+        return
+
     print("\n❓ Credential Verification:")
     print("   📧 Email format looks correct" if "@" in email and "." in email else "   ⚠️  Email format might be wrong")
-    print("   🔐 Password received" if password else "   ❌ No password entered")
-    
+    print("   🔐 Password provided")
+
     print("\n💡 To verify these are correct:")
     print("   1. Can you log into https://cloud.supernote.com with these credentials?")
     print("   2. Do you see your .note files when you log in?")
-    
-    proceed = input("\n✅ Credentials look right? Press Enter to continue, or Ctrl+C to quit...")
     
     print("\n🔄 Testing connection with detailed logging...")
     

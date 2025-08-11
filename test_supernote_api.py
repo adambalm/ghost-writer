@@ -3,9 +3,9 @@
 Test script for Supernote Cloud API integration
 
 Usage:
-    python test_supernote_api.py
+    SUPERNOTE_EMAIL=you@example.com SUPERNOTE_PASSWORD=your-password python test_supernote_api.py
 
-This script will prompt for Supernote credentials and test the API connection.
+This script reads Supernote credentials from environment variables and tests the API connection.
 """
 
 import os
@@ -24,17 +24,14 @@ def test_supernote_api():
     print("🚀 Testing Supernote Cloud API Integration")
     print("=" * 50)
     
-    # Get credentials from user
-    email = input("Enter your Supernote email: ").strip()
-    if not email:
-        print("❌ Email is required")
+    # Get credentials from environment
+    email = os.environ.get("SUPERNOTE_EMAIL", "").strip()
+    password = os.environ.get("SUPERNOTE_PASSWORD", "")
+
+    if not email or not password:
+        print("❌ SUPERNOTE_EMAIL and SUPERNOTE_PASSWORD must be set in the environment")
         return False
-    
-    password = input("Enter your Supernote password: ").strip()
-    if not password:
-        print("❌ Password is required") 
-        return False
-    
+
     # Create credentials
     credentials = SupernoteCredentials(
         email=email,
