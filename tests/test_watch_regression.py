@@ -23,13 +23,13 @@ def test_watch_on_file_added_processing():
         # Create a dummy file
         test_file.write_bytes(b"fake image data")
         
-        # Mock all the components
-        with patch('src.cli.HybridOCR') as mock_ocr_class, \
-             patch('src.cli.RelationshipDetector') as mock_detector_class, \
-             patch('src.cli.ConceptExtractor') as mock_extractor_class, \
-             patch('src.cli.ConceptClusterer') as mock_clusterer_class, \
-             patch('src.cli.StructureGenerator') as mock_generator_class, \
-             patch('src.cli.DatabaseManager') as mock_db_class, \
+        # Mock all the components at their import locations
+        with patch('src.utils.ocr_providers.HybridOCR') as mock_ocr_class, \
+             patch('src.utils.relationship_detector.RelationshipDetector') as mock_detector_class, \
+             patch('src.utils.concept_clustering.ConceptExtractor') as mock_extractor_class, \
+             patch('src.utils.concept_clustering.ConceptClusterer') as mock_clusterer_class, \
+             patch('src.utils.structure_generator.StructureGenerator') as mock_generator_class, \
+             patch('src.utils.database.DatabaseManager') as mock_db_class, \
              patch('src.cli.process_single_file') as mock_process:
             
             # Setup return values
@@ -104,7 +104,7 @@ def test_watch_on_file_added_error_handling():
         test_file = temp_path / "test_image.png"
         test_file.write_bytes(b"fake image data")
         
-        with patch('src.cli.HybridOCR', side_effect=Exception("Mock error")):
+        with patch('src.utils.ocr_providers.HybridOCR', side_effect=Exception("Mock error")):
             
             def test_on_file_added_with_error(file_path: Path):
                 try:

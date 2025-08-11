@@ -27,3 +27,6 @@ logs/
 # test backups
 *.bak
 *.broken.*
+
+# CI artifacts
+.handoff/
