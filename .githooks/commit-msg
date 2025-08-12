@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+MSG_FILE="$1"
+MAX_FILES=${MAX_FILES:-10}; MAX_LINES=${MAX_LINES:-400}
+grep -qi 'OVERRIDE-BUDGET:' "$MSG_FILE" && exit 0
+files=$(git diff --cached --name-only | wc -l | tr -d ' ')
+lines=$(git diff --cached --numstat | awk '{s+=$1+$2} END{print s+0}')
+if [ "$files" -gt "$MAX_FILES" ] || [ "$lines" -gt "$MAX_LINES" ]; then
+  echo "Commit exceeds budget: ${files} files, ${lines} lines. Add 'OVERRIDE-BUDGET: <reason>' to the commit message or split the change."; exit 1
+fi
