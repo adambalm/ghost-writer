@@ -1,0 +1,28 @@
+name: budget-check
+on: [pull_request]
+jobs:
+  budget:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: diff
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"; head="${{ github.event.pull_request.head.sha }}"
+          echo "files=$(git diff --name-only "$base" "$head" | wc -l | tr -d ' ')" >> $GITHUB_OUTPUT
+          echo "lines=$(git diff --numstat "$base" "$head" | awk '{s+=$1+$2} END{print s+0}')" >> $GITHUB_OUTPUT
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const maxFiles = 10, maxLines = 400;
+            const files = parseInt(core.getInput('files', { required: false }) || process.env.FILES || '${{ steps.diff.outputs.files }}');
+            const lines = parseInt(core.getInput('lines', { required: false }) || process.env.LINES || '${{ steps.diff.outputs.lines }}');
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number
+            });
+            const approved = labels.some(l => l.name.toLowerCase() === 'budget-override-approved');
+            core.info(`Files=${files} Lines=${lines} Approved=${approved}`);
+            if ((files > maxFiles || lines > maxLines) && !approved) {
+              core.setFailed(`PR exceeds budget (${files} files, ${lines} lines) without 'budget-override-approved' label`);
+            }

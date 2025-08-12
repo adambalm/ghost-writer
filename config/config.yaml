@@ -115,11 +115,11 @@ files:
 # Supernote Cloud Integration
 supernote:
   enabled: false                     # Enable Supernote Cloud sync
-  email: ""                         # Your Supernote account email
-  password: ""                      # Your Supernote account password (optional if using tokens)
-  access_token: ""                  # Access token (obtained after first login)
-  refresh_token: ""                 # Refresh token for automatic token renewal
-  device_id: ""                     # Device ID (auto-generated if not provided)
+  email_env: "SUPERNOTE_EMAIL"       # Environment variable for account email
+  password_env: "SUPERNOTE_PASSWORD" # Environment variable for account password
+  access_token_env: "SUPERNOTE_ACCESS_TOKEN"   # Environment variable for access token
+  refresh_token_env: "SUPERNOTE_REFRESH_TOKEN" # Environment variable for refresh token
+  device_id_env: "SUPERNOTE_DEVICE_ID"         # Environment variable for device ID
   sync_interval: 3600               # Sync interval in seconds (1 hour)
   local_sync_dir: "data/supernote_sync/"  # Local directory for synced files
   auto_process: true                # Automatically process downloaded files

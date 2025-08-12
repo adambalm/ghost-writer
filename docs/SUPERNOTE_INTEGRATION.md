@@ -93,9 +93,9 @@ files:
 ```yaml
 supernote:
   enabled: true
-  email: "your.email@example.com"
-  password: "your_supernote_password"
-  access_token: ""  # Automatically obtained after first login
+  email_env: SUPERNOTE_EMAIL
+  password_env: SUPERNOTE_PASSWORD
+  access_token_env: SUPERNOTE_ACCESS_TOKEN  # Automatically obtained after first login
   sync_interval: 3600  # Sync every hour
   local_sync_dir: "data/supernote_sync/"
   auto_process: true
@@ -104,7 +104,7 @@ supernote:
 
 **Setup Steps:**
 1. Copy `config/supernote_example.yaml` to your main config
-2. Update with your Supernote account credentials
+2. Export `SUPERNOTE_EMAIL` and `SUPERNOTE_PASSWORD` with your credentials
 3. Test connection: `python test_supernote_api.py`
 4. Start syncing: `ghost-writer sync`
 

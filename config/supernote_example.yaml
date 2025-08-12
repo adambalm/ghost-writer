@@ -6,12 +6,12 @@ supernote:
   # Enable Supernote Cloud integration
   enabled: true
   
-  # Your Supernote account credentials
-  email: "your.email@example.com"
-  password: "your_supernote_password"
-  
+  # Environment variables for Supernote account credentials
+  email_env: SUPERNOTE_EMAIL
+  password_env: SUPERNOTE_PASSWORD
+
   # Optional: Access token (will be automatically obtained and stored)
-  access_token: ""
+  access_token_env: SUPERNOTE_ACCESS_TOKEN
   
   # Sync settings
   sync_interval: 3600                    # Sync every hour (in seconds)

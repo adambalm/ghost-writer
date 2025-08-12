@@ -28,6 +28,11 @@ jobs:
       - uses: actions/setup-python@v5
         if: steps.changes.outputs.skip != 'true'
         with: { python-version: "3.10" }
+      - name: install tesseract
+        if: steps.changes.outputs.skip != 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr
       - name: run tests strictly
         if: steps.changes.outputs.skip != 'true'
         run: |
@@ -36,9 +41,9 @@ jobs:
           source .venv/bin/activate
           pip install -q --upgrade pip
           pip install -q pytest coverage ruff==0.6.9 mypy==1.11.1 junitparser types-Pillow==10.2.0.20240520
+          pip install -q -r requirements.txt
           mkdir -p .handoff
           pytest --junitxml=.handoff/tests.xml -ra --strict-markers --strict-config
-          coverage run -m pytest -q
           coverage xml -o .handoff/coverage.xml
           python - <<'PY'
           from junitparser import JUnitXml

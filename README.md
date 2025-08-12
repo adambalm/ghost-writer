@@ -317,9 +317,9 @@ Ghost Writer includes Supernote integration with API authentication and file syn
 **Quick Test:**
 ```bash
 # Test your Supernote Cloud connection
+export SUPERNOTE_EMAIL="your.email@example.com"
+export SUPERNOTE_PASSWORD="your-password"
 python debug_supernote_test.py
-# Enter phone number: 4139491742 (or your number)
-# Enter password: [your Supernote Cloud password]
 ```
 
 **Features:**
