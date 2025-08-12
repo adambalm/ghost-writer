@@ -58,6 +58,34 @@ pytest -q -k "not supernote and not e2e_supernote"
 - CI/CD: All GitHub Actions passing ✅
 - Branch protection: Active with required status checks ✅
 
+## GIT WORKFLOW
+
+1. **Branch Management**:
+   - Work on feature branches: `feat/description`, `fix/description`, `chore/description`
+   - Keep main branch clean and deployable
+   - Delete feature branches after merging to avoid clutter
+   - Always specify target branch: `git push origin branch-name`
+
+2. **Standard Workflow**:
+   ```bash
+   # Create feature branch from main
+   git checkout main && git pull origin main
+   git checkout -b feat/new-feature
+   
+   # Work and commit changes
+   git add . && git commit -m "feat: description"
+   
+   # Push to remote feature branch
+   git push origin feat/new-feature
+   
+   # Create PR to main, then after merge:
+   git checkout main && git pull origin main
+   git branch -d feat/new-feature
+   git push origin --delete feat/new-feature
+   ```
+
+3. **Never use bare `git push`** - always specify `git push origin <branch-name>`
+
 ## COMMIT POLICY
 
 1. **File limits**: Max 7 files per commit, 300 lines diff (use multiple commits for larger changes)
