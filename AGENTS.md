@@ -1,51 +1,83 @@
-# DEVELOPMENT LOG
+# AGENTS.md
 
-This file tracks development context and coordination between different development sessions.
-It ensures continuity of work across sessions and context switches.
-
----
-
-## Purpose
-- Maintain state awareness between development sessions
-- Provide clear entry points for resuming work
-- Capture decisions, rationale, and current tasks
+This file coordinates development efforts between different AI agents (primarily OpenAI Codex) working on the Ghost Writer repository.
 
 ---
 
-## Current Active Branch
-fix/triage-pack-1
+## CURRENT STATUS
+
+**Active Branch:** chore/ignore-handoff
+**Test State:** 137 tests passing, 0 failures (100% pass rate)
+**Coverage:** 70.45% overall code coverage
+**CI Status:** All checks passing
+**OCR Integration:** Working with Tesseract 5.3.4
+**Environment:** Ubuntu 24.04, Python 3.12.3
 
 ---
 
-## Last Session
-**Session:** Development cleanup
-**Tool:** Claude Code CLI  
-**Date:** 2025-08-10
-**Focus:** Documentation cleanup and test baseline verification
+## REPOSITORY STRUCTURE
+
+Clean, organized structure:
+- `scripts/` - Testing and debugging utilities for Supernote integration
+- `docs/setup/` - Environment and installation guides
+- `docs/development/` - Development processes, testing strategy, and decisions
+- `docs/` - API documentation and specifications
+- `src/` - Source code organized by functionality
+- `tests/` - Comprehensive test suite with 137 passing tests
 
 ---
 
-## Key Context
-- Current test state: 112 passed, 7 failed, 23 deselected
-- OCR integration working with Tesseract 5.3.4
-- Environment verified: Ubuntu 24.04, Python 3.12.3
-- Documentation cleaned up to remove aspirational content
+## CODEX COORDINATION PROTOCOLS
+
+1. **Before Starting Work:**
+   - Read CLAUDE.md for current development protocols and git workflow
+   - Check CI status and test results in .handoff/tests.xml
+   - Review recent commits for context
+
+2. **Security Requirements:**
+   - No hardcoded credentials or API keys in any files
+   - Use environment variables for all secrets
+   - Implement proper HTTP timeouts (30s default)
+   - Follow principle of least privilege
+
+3. **Testing Standards:**
+   - All tests must pass before commits (currently 137/137 passing)
+   - Run: `python -m pytest tests/ -v --cov=src --cov-report=html`
+   - Target: Maintain >65% code coverage (currently 70.45%)
+
+4. **Code Quality:**
+   - Run linting: `ruff check src/`
+   - Run type checking: `mypy src/ --ignore-missing-imports`
+   - Follow existing code patterns and conventions
 
 ---
 
-## Next Steps
-1. Address 7 failing tests (behavioral mismatches, not environment issues)
-2. Implement missing functions: convert_note_to_images
-3. Fix constructor parameter mismatches in HybridOCR
-4. Resolve confidence formatting (integer vs decimal percentages)
-5. Fix CLI return value handling
+## RECENT ACHIEVEMENTS
+
+- ✅ Resolved all failing tests (from 7 failures to 0)
+- ✅ Fixed Supernote parser content detection with smart algorithms
+- ✅ Cleaned CI workflow to eliminate duplicate coverage collection
+- ✅ Fixed GitHub Repository Rules for branch protection
+- ✅ Organized repository structure (moved scripts to scripts/, docs to docs/)
+- ✅ Established git workflow protocols
 
 ---
 
-## Files to Check Before Resuming
-- CLAUDE.md (development guidance)
-- DECISION_HISTORY.md (architectural decisions) 
-- PRODUCT_SPECIFICATION.md (requirements)
-- TESTING_STRATEGY.md (testing approach)
-- Current failing tests (7 identified)
+## SUPERNOTE INTEGRATION TOOLS
+
+Located in `scripts/` directory:
+- `debug_supernote_test.py` - Detailed connection debugging with step-by-step verification
+- `test_supernote_api.py` - API integration test using SupernoteCloudAPI classes
+- `quick_supernote_test.py` - Quick connection test for users
+- Additional utilities: `validate_supernote.py`, `final_supernote_test.py`, etc.
+
+---
+
+## DEVELOPMENT FOCUS AREAS
+
+1. **OCR Pipeline Optimization:** Hybrid routing between Tesseract/Google Vision/GPT-4V
+2. **Relationship Detection:** Visual and semantic analysis between note elements
+3. **Concept Clustering:** Multi-strategy extraction and thematic organization
+4. **Structure Generation:** Multiple output formats (outline, mindmap, timeline, process)
+5. **Cost Controls:** Daily budget limits with automatic fallbacks
 

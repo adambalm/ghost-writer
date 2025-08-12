@@ -42,9 +42,65 @@ pytest -q -k "not supernote and not e2e_supernote"
 
 ## CURRENT STATUS
 
-- Test suite: 112 passed, 7 failing, 23 deselected
+- Test suite: **137 passed, 0 failing** ✅
+- Test coverage: **70.45%** (exceeds 65% requirement) ✅
 - OCR integration: Working with Tesseract 5.3.4
 - Environment: Ubuntu 24.04, Python 3.12.3
-# Commit policy
-# 1) Max 7 files per commit, 300 lines diff (use multiple commits).
-# 2) Commit body must include: RISK:, ROLLBACK:, EVIDENCE: path(s) in .handoff/.
+- CI/CD: All GitHub Actions passing ✅
+- Branch protection: Active with required status checks ✅
+
+## GIT WORKFLOW
+
+1. **Branch Management**:
+   - Work on feature branches: `feat/description`, `fix/description`, `chore/description`
+   - Keep main branch clean and deployable
+   - Delete feature branches after merging to avoid clutter
+   - Always specify target branch: `git push origin branch-name`
+
+2. **Standard Workflow**:
+   ```bash
+   # Create feature branch from main
+   git checkout main && git pull origin main
+   git checkout -b feat/new-feature
+   
+   # Work and commit changes
+   git add . && git commit -m "feat: description"
+   
+   # Push to remote feature branch
+   git push origin feat/new-feature
+   
+   # Create PR to main, then after merge:
+   git checkout main && git pull origin main
+   git branch -d feat/new-feature
+   git push origin --delete feat/new-feature
+   ```
+
+3. **Never use bare `git push`** - always specify `git push origin <branch-name>`
+
+## COMMIT POLICY
+
+1. **File limits**: Max 7 files per commit, 300 lines diff (use multiple commits for larger changes)
+2. **Commit body must include**: 
+   - RISK: (assessment of change risk)
+   - ROLLBACK: (how to undo if needed)
+   - EVIDENCE: (path to test results in .handoff/)
+
+## REPOSITORY ORGANIZATION
+
+- **scripts/**: Utility scripts for testing and debugging Supernote integration
+- **docs/**: All documentation organized by category (setup, development, api)
+- **src/**: Source code organized by functionality
+- **tests/**: Test suite with clear naming and coverage
+
+## SECURITY REQUIREMENTS
+
+- Never commit hardcoded credentials
+- Use environment variables for sensitive configuration
+- Include timeouts on all HTTP requests
+- Validate input parameters and handle edge cases
+
+## WORKING WITH OTHER AGENTS
+
+- **AGENTS.md**: Used by OpenAI Codex for context and coordination
+- **CLAUDE.md**: Used by Claude Code (this file) for development protocols
+- Both files should be kept current and reflect actual repository status
