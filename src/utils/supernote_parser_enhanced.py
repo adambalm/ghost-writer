@@ -510,7 +510,7 @@ class SupernoteParser:
                 if bitmap_address + 4 <= len(data):
                     actual_size = int.from_bytes(data[bitmap_address:bitmap_address+4], 'little')
                     
-                    page_num = len([l for l in layers if 'MAINLAYER' in l.get('name', '')]) + 1
+                    page_num = len([layer for layer in layers if 'MAINLAYER' in layer.get('name', '')]) + 1
                     
                     layer_info = {
                         "name": f"Page{page_num}_{layer_name}",
@@ -861,7 +861,7 @@ class SupernoteParser:
                 
                 pos += 4
                 
-            except:
+            except Exception:
                 pos += 1
         
         return output
@@ -891,7 +891,7 @@ class SupernoteParser:
                 
                 pos += 2
                 
-            except:
+            except Exception:
                 pos += 1
         
         return output
@@ -947,7 +947,7 @@ class SupernoteParser:
                 
                 pos += chunk_size
                 
-            except:
+            except Exception:
                 pos += 1
         
         return output
