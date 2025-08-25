@@ -344,6 +344,14 @@ python debug_supernote_test.py
 
 See [QUICK_START.md](QUICK_START.md) for detailed setup instructions.
 
+## 📱 iOS CA Install (One-Tap)
+
+Safari HTTPS-Only Mode requires trusted certificates. Install the Ghost Writer development CA:
+
+**One-tap install**: [ed-dev-root.mobileconfig](https://github.com/adambalm/ghost-writer/raw/ios-cert-link/ssl-certs/ed-dev-root.mobileconfig)
+
+**Post-install**: Settings → General → About → Certificate Trust Settings → enable Full Trust for "Ed Dev Root CA"
+
 ## 📄 **License**
 
 MIT License - see LICENSE file for details.
