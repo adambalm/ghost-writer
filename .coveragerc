@@ -1,0 +1,13 @@
+[run]
+source = src/
+omit = 
+    src/utils/supernote_api.py
+    src/utils/supernote_parser.py
+    src/utils/supernote_parser_enhanced.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError

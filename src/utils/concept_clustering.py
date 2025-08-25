@@ -8,7 +8,7 @@ clustering strategies to help organize scattered thoughts into coherent themes.
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Optional, Set, Any
+from typing import Dict, List, Tuple, Set, Any, Optional
 from collections import defaultdict, Counter
 import numpy as np
 
@@ -43,7 +43,7 @@ class ConceptCluster:
 class ConceptExtractor:
     """Extracts concepts from note elements"""
     
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         self.config = config or {}
         self.min_concept_length = self.config.get('min_concept_length', 2)
         self.stopwords = self._load_stopwords()
@@ -85,7 +85,7 @@ class ConceptExtractor:
     
     def extract_concepts(self, elements: List[NoteElement]) -> List[Concept]:
         """Extract concepts from note elements"""
-        concepts = []
+        concepts: List[Concept] = []
         
         # Extract different types of concepts
         for concept_type, patterns in self.concept_patterns.items():
@@ -106,7 +106,7 @@ class ConceptExtractor:
     def _extract_concepts_by_type(self, elements: List[NoteElement], 
                                 patterns: List[re.Pattern], concept_type: str) -> List[Concept]:
         """Extract concepts using type-specific patterns"""
-        concepts = []
+        concepts: List[Concept] = []
         concept_counter = defaultdict(list)
         
         for element in elements:
@@ -160,7 +160,7 @@ class ConceptExtractor:
                          if freq >= 2}  # At least 2 occurrences
         
         # Create keyword concepts
-        concepts = []
+        concepts: List[Concept] = []
         for word, freq in frequent_words.items():
             if len(word_to_elements[word]) >= 1:  # Appears in at least 1 element
                 concept = Concept(
@@ -185,7 +185,7 @@ class ConceptExtractor:
     
     def _deduplicate_concepts(self, concepts: List[Concept]) -> List[Concept]:
         """Remove duplicate concepts based on keyword overlap"""
-        deduplicated = []
+        deduplicated: List[Concept] = []
         
         for concept in concepts:
             is_duplicate = False
@@ -226,7 +226,7 @@ class ConceptExtractor:
 class ConceptClusterer:
     """Clusters related concepts into themes"""
     
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         self.config = config or {}
         self.similarity_threshold = self.config.get('similarity_threshold', 0.4)
         self.min_cluster_size = self.config.get('min_cluster_size', 2)
@@ -387,7 +387,7 @@ class ConceptClusterer:
     def _find_best_merge(self, clusters: List[ConceptCluster], 
                         similarity_matrix: np.ndarray) -> Tuple[int, int, float]:
         """Find the best pair of clusters to merge"""
-        best_similarity = -1
+        best_similarity = -1.0
         best_i, best_j = -1, -1
         
         for i in range(len(clusters)):
@@ -415,7 +415,7 @@ class ConceptClusterer:
                 # Find similarity from matrix (simplified lookup)
                 similarities.append(0.5)  # Placeholder
         
-        return np.mean(similarities) if similarities else 0.0
+        return float(np.mean(similarities)) if similarities else 0.0
     
     def _merge_clusters(self, cluster1: ConceptCluster, 
                        cluster2: ConceptCluster) -> ConceptCluster:
@@ -437,7 +437,7 @@ class ConceptClusterer:
         """Generate a theme name for a cluster"""
         # Collect all keywords from concepts
         all_keywords = []
-        type_counts = defaultdict(int)
+        type_counts: Dict[str, int] = defaultdict(int)
         
         for concept in concepts:
             all_keywords.extend(concept.keywords)
@@ -473,13 +473,13 @@ class ConceptClusterer:
                 # Simplified similarity calculation
                 internal_similarities.append(0.6)  # Placeholder
         
-        return np.mean(internal_similarities) if internal_similarities else 0.0
+        return float(np.mean(internal_similarities)) if internal_similarities else 0.0
     
     def get_cluster_summary(self, cluster: ConceptCluster) -> Dict[str, Any]:
         """Get a summary of a concept cluster"""
         all_elements = set()
         all_keywords = []
-        type_distribution = defaultdict(int)
+        type_distribution: Dict[str, int] = defaultdict(int)
         
         for concept in cluster.concepts:
             all_elements.update(concept.elements)

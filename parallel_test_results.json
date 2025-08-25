@@ -1,0 +1,98 @@
+{
+  "timestamp": "2025-08-19T02:43:07.081122",
+  "sn2md": {
+    "approach": "sn2md",
+    "success": true,
+    "pages": [
+      {
+        "page": 1,
+        "visibility": "INVISIBLE",
+        "content_pixels": 2859430,
+        "mean_brightness": 187.15,
+        "has_content": true,
+        "image_mode": "RGBA",
+        "image_size": [
+          1404,
+          1872
+        ]
+      },
+      {
+        "page": 2,
+        "visibility": "INVISIBLE",
+        "content_pixels": 2693922,
+        "mean_brightness": 190.09,
+        "has_content": true,
+        "image_mode": "RGBA",
+        "image_size": [
+          1404,
+          1872
+        ]
+      },
+      {
+        "page": 1,
+        "visibility": "DEFAULT",
+        "content_pixels": 346713,
+        "mean_brightness": 245.79,
+        "has_content": true,
+        "image_mode": "RGB",
+        "image_size": [
+          1404,
+          1872
+        ]
+      },
+      {
+        "page": 2,
+        "visibility": "DEFAULT",
+        "content_pixels": 98451,
+        "mean_brightness": 252.39,
+        "has_content": true,
+        "image_mode": "RGB",
+        "image_size": [
+          1404,
+          1872
+        ]
+      },
+      {
+        "page": 1,
+        "visibility": "VISIBLE",
+        "content_pixels": 346713,
+        "mean_brightness": 245.79,
+        "has_content": true,
+        "image_mode": "RGB",
+        "image_size": [
+          1404,
+          1872
+        ]
+      },
+      {
+        "page": 2,
+        "visibility": "VISIBLE",
+        "content_pixels": 98451,
+        "mean_brightness": 252.39,
+        "has_content": true,
+        "image_mode": "RGB",
+        "image_size": [
+          1404,
+          1872
+        ]
+      }
+    ],
+    "errors": [],
+    "total_pages": 2,
+    "dimensions": "1404x1872",
+    "processing_time": 0.7525794506072998
+  },
+  "custom": {
+    "approach": "custom",
+    "success": true,
+    "pages": [
+      {
+        "page": 1,
+        "visibility": "custom",
+        "metadata": {
+          "parser": "new_format_rle",
+          "format": "SN_FILE_VER_20230015\u0001",
+          "layer_name": "Page1_MAINLAYER",
+          "bitmap_size": 141890,
+          "status": "decoded",
+          "decoded_bitmap": 

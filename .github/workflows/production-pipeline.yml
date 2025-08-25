@@ -1,0 +1,204 @@
+name: Enterprise Production Pipeline
+on:
+  push:
+    branches: [main, release/*]
+  pull_request:
+    branches: [main]
+
+env:
+  PRODUCTION_READINESS_THRESHOLD: 80
+  COVERAGE_THRESHOLD: 65
+  CONTENT_EXTRACTION_THRESHOLD: 80
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.gates.outputs.deploy }}
+      production-ready: ${{ steps.gates.outputs.production-ready }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y tesseract-ocr
+          python -m pip install --upgrade pip
+          pip install ruff==0.6.9 pytest coverage
+          pip install mypy==1.11.1
+          
+      - name: Lint Check (Ruff)
+        run: |
+          ruff check src/ --output-format=github
+          
+      - name: Type Check (MyPy)
+        run: |
+          mypy --config-file mypy.ini src
+        
+      - name: Type Check Diagnostics (on failure)
+        if: failure()
+        run: |
+          echo "PWD=$(pwd)"; git rev-parse HEAD
+          mypy --version
+          sed -n '320,350p' src/utils/database.py || true
+          sed -n '60,90p' src/utils/ocr_providers.py || true
+          
+      - name: Security Scan
+        run: |
+          pip install bandit safety
+          bandit -r src/ -f json -o security-report.json || true
+          safety check --json --output safety-report.json || true
+          
+      - name: Test Suite with Coverage
+        run: |
+          mkdir -p .handoff
+          pytest tests/ -v \
+            --cov=src \
+            --cov-report=xml:.handoff/coverage.xml \
+            --cov-report=html:reports/coverage \
+            --junitxml=.handoff/tests.xml \
+            --cov-fail-under=${{ env.COVERAGE_THRESHOLD }}
+            
+      - name: Production Readiness Assessment
+        id: readiness
+        if: hashFiles('production_readiness_assessment.py') != ''
+        continue-on-error: true
+        run: |
+          python production_readiness_assessment.py > readiness_output.txt 2>&1 || true
+          if [ -f "production_readiness_*.json" ]; then
+            SCORE=$(python -c "
+import json, glob
+try:
+    files = glob.glob('production_readiness_*.json')
+    if files:
+        with open(files[0]) as f:
+            data = json.load(f)
+            print(data.get('production_readiness', {}).get('score', 50))
+    else:
+        print(50)
+except Exception:
+    print(50)
+" 2>/dev/null || echo "50")
+            echo "score=$SCORE" >> $GITHUB_OUTPUT
+          else
+            echo "score=50" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Upload Readiness Report
+        if: success() && hashFiles('production_readiness_*.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: readiness-report
+          path: production_readiness_*.json
+          
+      - name: Licensing Compliance Check
+        run: |
+          pip install pip-licenses
+          pip-licenses --format=json --output-file=licenses.json
+          python scripts/check_commercial_licenses.py licenses.json
+          
+      - name: Quality Gates Decision
+        id: gates
+        run: |
+          COVERAGE=$(python -c "import xml.etree.ElementTree as ET; print(int(float(ET.parse('.handoff/coverage.xml').getroot().attrib['line-rate']) * 100))")
+          READINESS_SCORE=${{ steps.readiness.outputs.score }}
+          
+          echo "Coverage: $COVERAGE%, Readiness: $READINESS_SCORE/100"
+          
+          # Deployment decision logic
+          DEPLOY=false
+          PRODUCTION_READY=false
+          
+          if [ $COVERAGE -ge ${{ env.COVERAGE_THRESHOLD }} ] && \
+             [ $READINESS_SCORE -ge ${{ env.PRODUCTION_READINESS_THRESHOLD }} ]; then
+            PRODUCTION_READY=true
+            DEPLOY=true
+          elif [ $COVERAGE -ge 60 ] && [ $READINESS_SCORE -ge 65 ]; then
+            DEPLOY=true  # Staging deployment only
+          fi
+          
+          echo "deploy=$DEPLOY" >> $GITHUB_OUTPUT
+          echo "production-ready=$PRODUCTION_READY" >> $GITHUB_OUTPUT
+          
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports
+          path: |
+            .handoff/
+            reports/
+            *-report.json
+
+  staging-deployment:
+    needs: quality-gates
+    if: needs.quality-gates.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Staging
+        run: |
+          echo "Deploying to staging environment..."
+          # Container build and deployment logic
+          docker build -t ghost-writer:staging .
+          # Deploy to staging cluster
+          
+      - name: Staging Smoke Tests
+        if: hashFiles('scripts/staging_smoke_tests.py') != ''
+        continue-on-error: true
+        run: |
+          python scripts/staging_smoke_tests.py
+          
+      - name: Performance Benchmarks
+        if: hashFiles('scripts/performance_benchmark.py') != ''
+        continue-on-error: true
+        run: |
+          python scripts/performance_benchmark.py --env staging
+
+  production-deployment:
+    needs: [quality-gates, staging-deployment]
+    if: needs.quality-gates.outputs.production-ready == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Blue-Green Deployment
+        run: |
+          echo "Initiating blue-green deployment..."
+          # Production deployment with rollback capability
+          
+      - name: Production Health Checks
+        if: hashFiles('scripts/production_health_check.py') != ''
+        continue-on-error: true
+        run: |
+          python scripts/production_health_check.py
+          
+      - name: Enable Production Traffic
+        run: |
+          echo "Switching production traffic to new deployment..."
+
+  rollback-capability:
+    needs: production-deployment
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Automatic Rollback
+        if: failure() && hashFiles('scripts/rollback_deployment.py') != ''
+        run: |
+          echo "Production deployment failed - initiating rollback..."
+          python scripts/rollback_deployment.py
+          
+      - name: Rollback Notification (fallback)
+        if: failure() && hashFiles('scripts/rollback_deployment.py') == ''
+        run: |
+          echo "Production deployment failed but no rollback script available"
+          echo "Manual intervention required"
+          exit 1

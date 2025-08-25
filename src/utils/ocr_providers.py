@@ -7,7 +7,7 @@ import time
 import base64
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Any, Union
+from typing import Dict, List, Optional, Any, Union
 from pathlib import Path
 import logging
 
@@ -58,7 +58,7 @@ class OCRProvider(ABC):
     
     def preprocess_image(self, image_path: Union[str, Path]) -> Image.Image:
         """Common image preprocessing pipeline"""
-        image = Image.open(image_path)
+        image: Image.Image = Image.open(image_path)
         
         # Convert to RGB if needed
         if image.mode != 'RGB':
@@ -463,7 +463,7 @@ class HybridOCR(OCRProvider):
     
     def __init__(self, provider_config: Dict[str, Any]):
         super().__init__(provider_config)
-        self.providers = {}
+        self.providers: Dict[str, OCRProvider] = {}
         self._initialize_providers()
     
     def _initialize_providers(self):

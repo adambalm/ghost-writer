@@ -4,11 +4,9 @@ Debugging utilities and development helpers for Ghost Writer
 
 import functools
 import time
-import traceback
 import sys
 import json
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Callable
 import logging
 from contextlib import contextmanager
 
@@ -92,7 +90,7 @@ class StateInspector:
     @staticmethod 
     def log_variable_state(var_name: str, value: Any, context: str = ""):
         """Log variable state with type and value info"""
-        info = {
+        info: Dict[str, Any] = {
             'variable': var_name,
             'type': type(value).__name__,
             'context': context
@@ -234,7 +232,7 @@ class TestDataValidator:
         issues = []
         
         try:
-            stats = db_manager.get_database_stats()
+            db_manager.get_database_stats()
             
             # Check for orphaned records
             with db_manager.get_connection() as conn:

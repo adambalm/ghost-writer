@@ -5,7 +5,7 @@ Ghost Writer CLI - Command-line interface for processing Supernote files
 import logging
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import click
 from rich.console import Console
@@ -26,7 +26,6 @@ logger = logging.getLogger(__name__)
 
 def setup_cli_logging(debug: bool = False):
     """Setup logging for CLI with rich console output"""
-    level = logging.DEBUG if debug else logging.INFO
     logger_config = {
         'level': 'DEBUG' if debug else 'INFO',
         'file_path': 'data/logs/ghost_writer.log',
@@ -63,16 +62,16 @@ def process(ctx, input_path: str, output: Optional[str], format: str,
             quality: str, local_only: bool):
     """Process handwritten notes from files or directories"""
     
-    console.print(f"🎯 [bold blue]Ghost Writer v2.0[/bold blue] - Processing Notes")
+    console.print("🎯 [bold blue]Ghost Writer v2.0[/bold blue] - Processing Notes")
     console.print(f"📁 Input: {input_path}")
     
-    input_path = Path(input_path)
+    input_path_obj = Path(input_path)
     
     # Determine output directory
     if output:
         output_dir = Path(output)
     else:
-        output_dir = input_path.parent / "ghost_writer_output"
+        output_dir = input_path_obj.parent / "ghost_writer_output"
     
     output_dir.mkdir(exist_ok=True)
     console.print(f"📤 Output: {output_dir}")
@@ -81,14 +80,14 @@ def process(ctx, input_path: str, output: Optional[str], format: str,
     files_to_process = []
     supported_extensions = {".png", ".jpg", ".jpeg", ".note", ".pdf"}
     
-    if input_path.is_file():
+    if input_path_obj.is_file():
         # Check if single file has supported extension
-        if input_path.suffix.lower() in supported_extensions:
-            files_to_process = [input_path]
+        if input_path_obj.suffix.lower() in supported_extensions:
+            files_to_process = [input_path_obj]
     else:
         # Find supported file types in directory
         for ext in supported_extensions:
-            files_to_process.extend(input_path.glob(f"**/*{ext}"))
+            files_to_process.extend(input_path_obj.glob(f"**/*{ext}"))
     
     if not files_to_process:
         console.print("❌ [red]No supported files found![/red]")
@@ -163,7 +162,7 @@ def process(ctx, input_path: str, output: Optional[str], format: str,
             
             progress.update(task, advance=1)
     
-    console.print(f"🎉 [bold green]Processing complete![/bold green]")
+    console.print("🎉 [bold green]Processing complete![/bold green]")
     console.print(f"📁 Results saved to: {output_dir}")
 
 
@@ -183,21 +182,39 @@ def process_single_file(
     
     # Step 1: OCR Processing
     if file_path.suffix.lower() == ".note":
-        # Convert .note file to images first
-        from .utils.supernote_parser import convert_note_to_images
+        # Convert .note file to images using enhanced clean room decoder
+        from .utils.supernote_parser_enhanced import convert_note_to_images
         
         temp_dir = output_dir / "temp_images"
         temp_dir.mkdir(exist_ok=True)
         
         try:
+            # Use enhanced clean room decoder for pixel extraction
             image_paths = convert_note_to_images(file_path, temp_dir)
             
             if not image_paths:
                 logger.warning(f"No images extracted from {file_path}")
                 return None
             
-            # Process the first image (or combine multiple pages later)
-            ocr_result = ocr_provider.extract_text(str(image_paths[0]))
+            logger.info(f"Enhanced decoder extracted {len(image_paths)} pages from {file_path.name}")
+            
+            # Process all images and combine results
+            all_text_results = []
+            for i, img_path in enumerate(image_paths, 1):
+                logger.info(f"Processing page {i}: {img_path.name}")
+                page_result = ocr_provider.extract_text(str(img_path))
+                if page_result and page_result.text.strip():
+                    all_text_results.append(f"=== Page {i} ===\n{page_result.text}")
+            
+            if all_text_results:
+                # Create combined OCR result
+                combined_text = "\n\n".join(all_text_results)
+                ocr_result = type(ocr_provider.extract_text(str(image_paths[0])))
+                ocr_result.text = combined_text
+                ocr_result.provider = f"{ocr_result.provider} (Enhanced Clean Room Decoder)"
+                logger.info(f"Combined OCR result: {len(combined_text)} characters from {len(all_text_results)} pages")
+            else:
+                ocr_result = None
             
             # Clean up temp images
             for img_path in image_paths:
@@ -219,7 +236,10 @@ def process_single_file(
         return None
     
     # Step 2: Store in database
-    note_id = db_manager.store_note(
+    import uuid
+    note_id = str(uuid.uuid4())
+    db_manager.insert_note(
+        note_id=note_id,
         source_file=str(file_path),
         raw_text=ocr_result.text,
         clean_text=ocr_result.text,
@@ -356,10 +376,9 @@ def export_as_json(file_path: Path, structures, elements, concepts, clusters,
 
 def export_as_pdf(file_path: Path, structures, output_dir: Path, ocr_result) -> Optional[str]:
     """Export processed note as PDF"""
-    from reportlab.lib.pagesizes import letter, A4
+    from reportlab.lib.pagesizes import A4
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.units import inch
     
     output_file = output_dir / f"{file_path.stem}_processed.pdf"
     
@@ -458,7 +477,7 @@ def watch(ctx, directory: str, output: Optional[str], interval: int, format: str
             from .utils.structure_generator import StructureGenerator
             from .utils.database import DatabaseManager
             
-            ocr_provider = HybridOCR()
+            ocr_provider = HybridOCR({})
             detector = RelationshipDetector()
             extractor = ConceptExtractor()
             clusterer = ConceptClusterer()
@@ -495,7 +514,7 @@ def watch(ctx, directory: str, output: Optional[str], interval: int, format: str
 def status():
     """Show system status and configuration"""
     
-    console.print(f"🤖 [bold blue]Ghost Writer v2.0 - System Status[/bold blue]\n")
+    console.print("🤖 [bold blue]Ghost Writer v2.0 - System Status[/bold blue]\n")
     
     # System info table
     table = Table(title="System Information")
@@ -530,7 +549,7 @@ def status():
     console.print(table)
     
     # Cost tracking info
-    console.print(f"\n💰 [bold]Cost Tracking[/bold]")
+    console.print("\n💰 [bold]Cost Tracking[/bold]")
     daily_limit = config.get("ocr", {}).get("hybrid", {}).get("cost_limit_per_day", 5.0)
     console.print(f"Daily Budget: ${daily_limit:.2f}")
 
@@ -542,18 +561,28 @@ def status():
 def sync(ctx, since: Optional[str], output: Optional[str]):
     """Sync notes from Supernote Cloud"""
     
-    console.print(f"☁️  [bold blue]Syncing from Supernote Cloud...[/bold blue]")
+    console.print("☁️  [bold blue]Syncing from Supernote Cloud...[/bold blue]")
     
     from .utils.supernote_api import create_supernote_client
     from datetime import datetime
     
     # Create API client
     try:
-        client = create_supernote_client(config)
+        client = create_supernote_client(config._config)
         if not client:
-            console.print("❌ [red]Supernote Cloud not configured or authentication failed[/red]")
-            console.print("💡 Configure credentials in config.yaml or use environment variables")
-            return
+            console.print("❌ [red]Supernote Cloud not configured[/red]")
+            console.print("💡 Let's set up your Supernote credentials")
+            
+            # Prompt for credentials
+            email = click.prompt("Enter your Supernote email", type=str)
+            password = click.prompt("Enter your Supernote password", hide_input=True, type=str)
+            
+            # Try again with credentials (pass them directly, not via config)
+            client = create_supernote_client(config._config, email=email, password=password)
+            if not client:
+                console.print("❌ [red]Authentication failed. Please check your credentials[/red]")
+                return
+            console.print("✅ [green]Successfully connected to Supernote Cloud![/green]")
     except Exception as e:
         console.print(f"❌ [red]Failed to initialize Supernote client: {e}[/red]")
         return
@@ -584,7 +613,7 @@ def sync(ctx, since: Optional[str], output: Optional[str]):
             console=console,
         ) as progress:
             
-            task = progress.add_task("Syncing files from cloud...", total=None)
+            progress.add_task("Syncing files from cloud...", total=None)
             downloaded_files = client.sync_recent_files(sync_dir, since_date)
         
         if downloaded_files:
@@ -615,7 +644,7 @@ def sync(ctx, since: Optional[str], output: Optional[str]):
 def init():
     """Initialize Ghost Writer configuration and database"""
     
-    console.print(f"🚀 [bold blue]Initializing Ghost Writer...[/bold blue]")
+    console.print("🚀 [bold blue]Initializing Ghost Writer...[/bold blue]")
     
     try:
         # Create data directories
@@ -625,16 +654,16 @@ def init():
             console.print(f"📁 Created directory: {dir_path}")
         
         # Initialize database
-        db_manager = DatabaseManager()
-        console.print(f"✅ Database initialized")
+        DatabaseManager()
+        console.print("✅ Database initialized")
         
         # Test OCR providers
         ocr_config = config.get("ocr", {})
         ocr = HybridOCR(provider_config=ocr_config)
         console.print(f"✅ OCR providers ready: {', '.join(ocr.providers.keys())}")
         
-        console.print(f"\n🎉 [bold green]Ghost Writer initialized successfully![/bold green]")
-        console.print(f"🏃 Ready to process notes with: [bold]ghost-writer process <path>[/bold]")
+        console.print("\n🎉 [bold green]Ghost Writer initialized successfully![/bold green]")
+        console.print("🏃 Ready to process notes with: [bold]ghost-writer process <path>[/bold]")
         
     except Exception as e:
         console.print(f"❌ [red]Initialization failed: {e}[/red]")

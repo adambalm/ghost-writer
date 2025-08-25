@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supernote Viewer</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .results { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+        .result-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .image-container { text-align: center; margin-bottom: 15px; }
+        .image-container img { max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px; }
+        .meta-info { background: #f8f9fa; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 14px; }
+        .transcription { background: #e3f2fd; padding: 15px; border-radius: 4px; border-left: 4px solid #2196F3; }
+        .button { background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        .button:hover { background: #45a049; }
+        .button.secondary { background: #2196F3; }
+        .button.secondary:hover { background: #0b7dda; }
+        .api-key-input { width: 300px; padding: 8px; margin: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .status { padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Supernote Viewer & Transcriber</h1>
+            <p>Extract images from Supernote files and transcribe with AI</p>
+            
+            <div style="margin: 20px 0;">
+                <button class="button" onclick="processNote()">📄 Process Note File</button>
+                <br>
+                <div style="margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;">
+                    <h3>Transcription Options:</h3>
+                    <div style="margin: 10px 0;">
+                        <strong>🖥️ Local Model (Free):</strong>
+                        <button class="button secondary" onclick="transcribeAllLocal()">🚀 Transcribe All (Local)</button>
+                        <span style="margin-left: 10px; font-size: 12px; color: #666;">Uses Qwen2.5-VL 7B</span>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <strong>☁️ OpenAI (Paid):</strong>
+                        <input type="password" class="api-key-input" id="apiKey" placeholder="OpenAI API Key" style="width: 250px;" />
+                        <button class="button secondary" onclick="transcribeAll()">🤖 Transcribe All (OpenAI)</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="status"></div>
+        </div>
+        
+        <div id="results" class="results"></div>
+    </div>
+
+    <script>
+        let currentResults = [];
+        
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.innerHTML = `<div class="status ${type}">${message}</div>`;
+            if (type !== 'error') {
+                setTimeout(() => status.innerHTML = '', 5000);
+            }
+        }
+        
+        async function processNote() {
+            showStatus('🔄 Processing note file...', 'info');
+            
+            try {
+                const response = await fetch('/process', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentResults = data.results;
+                    displayResults(currentResults);
+                    showStatus(`✅ ${data.message}`, 'success');
+                } else {
+                    showStatus(`❌ Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function transcribeImage(imagePath, index) {
+            const apiKey = document.getElementById('apiKey').value;
+            if (!apiKey) {
+                showStatus('❌ Please enter OpenAI API key', 'error');
+                return;
+            }
+            
+            showStatus(`🤖 Transcribing image ${index + 1}...`, 'info');
+            
+            try {
+                const response = await fetch('/transcribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image_path: imagePath, api_key: apiKey })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    showStatus(`❌ Transcription failed: ${data.error}`, 'error');
+                } else {
+                    currentResults[index].transcription = data.transcription;
+                    currentResults[index].cost = data.cost;
+                    displayResults(currentResults);
+                    showStatus(`✅ Transcribed image ${index + 1} (cost: $${data.cost})`, 'success');
+                }
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function transcribeImage(imagePath, index) {
+            const apiKey = document.getElementById('apiKey').value;
+            if (!apiKey) {
+                showStatus('❌ Please enter OpenAI API key', 'error');
+                return;
+            }
+            
+            showStatus(`🤖 Transcribing image ${index + 1} with OpenAI...`, 'info');
+            
+            try {
+                const response = await fetch('/transcribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image_path: imagePath, api_key: apiKey })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    showStatus(`❌ Transcription failed: ${data.error}`, 'error');
+                } else {
+                    currentResults[index].transcription = data.transcription;
+                    currentResults[index].cost = data.cost;
+                    currentResults[index].provider = data.provider;
+                    currentResults[index].model = data.model;
+                    displayResults(currentResults);
+                    showStatus(`✅ Transcribed image ${index + 1} (OpenAI, cost: $${data.cost})`, 'success');
+                }
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function transcribeImageLocal(imagePath, index) {
+            showStatus(`🖥️ Transcribing image ${index + 1} with local model...`, 'info');
+            
+            try {
+                const response = await fetch('/transcribe_local', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image_path: imagePath, model_name: 'qwen2.5vl:7b' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    showStatus(`❌ Local transcription failed: ${data.error}`, 'error');
+                } else {
+                    currentResults[index].transcription = data.transcription;
+                    currentResults[index].cost = data.cost;
+                    currentResults[index].processing_time = data.processing_time;
+                    currentResults[index].provider = data.provider;
+                    currentResults[index].model = data.model;
+                    displayResults(currentResults);
+                    showStatus(`✅ Transcribed image ${index + 1} (Local, ${data.processing_time}s, FREE)`, 'success');
+                }
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function transcribeAll() {
+            const contentImages = currentResults.filter(r => r.has_content);
+            if (contentImages.length === 0) {
+                showStatus('❌ No images with content to transcribe', 'error');
+                return;
+            }
+            
+            for (let i = 0; i < currentResults.length; i++) {
+                if (currentResults[i].has_content) {
+                    await transcribeImage(currentResults[i].image_path, i);
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Rate limiting
+                }
+            }
+        }
+
+        async function transcribeAllLocal() {
+            const contentImages = currentResults.filter(r => r.has_content);
+            if (contentImages.length === 0) {
+                showStatus('❌ No images with content to transcribe', 'error');
+                return;
+            }
+            
+            for (let i = 0; i < currentResults.length; i++) {
+                if (currentResults[i].has_content) {
+                    await transcribeImageLocal(currentResults[i].image_path, i);
+                    // No rate limiting needed for local model
+                }
+            }
+        }
+        
+        function displayResults(results) {
+            const container = document.getElementById('results');
+            
+            container.innerHTML = results.map((result, index) => `
+                <div class="result-card">
+                    <h3>📄 ${result.filename} - Page ${result.page}</h3>
+                    
+                    <div class="meta-info">
+                        <strong>Visibility:</strong> ${result.visibility}<br>
+                        <strong>Content Pixels:</strong> ${result.content_pixels.toLocaleString()}<br>
+                        <strong>Mean Brightness:</strong> ${result.mean_brightness}<br>
+                        <strong>Has Content:</strong> ${result.has_content ? '✅ Yes' : '❌ No'}<br>
+                        <strong>Status:</strong> ${result.status}
+                    </div>
+                    
+                    <div class="image-container">
+                        <img src="/images/${result.image_path}" alt="Page ${result.page}" />
+                    </div>
+                    
+                    ${result.transcription ? `
+                        <div class="transcription">
+                            <h4>🤖 AI Transcription</h4>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                                Provider: ${result.provider || 'unknown'} | 
+                                Model: ${result.model || 'unknown'} | 
+                                ${result.cost !== undefined ? `Cost: $${result.cost}` : ''} 
+                                ${result.processing_time ? `| Time: ${result.processing_time}s` : ''}
+                            </div>
+                            <p>${result.transcription}</p>
+                        </div>
+                    ` : result.has_content ? `
+                        <div style="margin: 10px 0;">
+                            <button class="button secondary" onclick="transcribeImageLocal('${result.image_path}', ${index})" style="margin-right: 10px;">
+                                🖥️ Transcribe (Local)
+                            </button>
+                            <button class="button secondary" onclick="transcribeImage('${result.image_path}', ${index})">
+                                ☁️ Transcribe (OpenAI)
+                            </button>
+                        </div>
+                    ` : '<p style="color: #666;">No content detected - skipping transcription</p>'}
+                </div>
+            `).join('');
+        }
+        
+        // Auto-load results on page load
+        window.onload = function() {
+            showStatus('💡 Click "Process Note File" to extract images from your Supernote file', 'info');
+        };
+    </script>
+</body>
+</html>

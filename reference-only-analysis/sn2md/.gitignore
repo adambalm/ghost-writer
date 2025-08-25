@@ -1,0 +1,12 @@
+.DS_Store
+housework-obsidian
+oldwork-obsidian
+personal-obsidian
+pinedesk-obsidian
+supernote
+transcripts
+.aider*
+__pycache__
+dist/
+.coverage
+*.spd-*

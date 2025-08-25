@@ -7,9 +7,9 @@ helping users organize scattered thoughts into logical outlines and hierarchies.
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Optional, Any, Set
+from typing import Dict, List, Optional, Any
 from enum import Enum
-from collections import defaultdict, Counter
+from collections import defaultdict
 import numpy as np
 
 from .relationship_detector import NoteElement, Relationship, RelationshipType
@@ -60,7 +60,7 @@ class DocumentStructure:
 class StructureGenerator:
     """Generates document structures from concepts and relationships"""
     
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         self.config = config or {}
         self.min_confidence = self.config.get('min_confidence', 0.3)
         self.max_depth = self.config.get('max_depth', 4)
@@ -134,7 +134,7 @@ class StructureGenerator:
         title = self._generate_document_title(clusters, concepts)
         
         # Calculate scores
-        confidence = np.mean([node.confidence for node in root_nodes]) if root_nodes else 0.0
+        confidence = float(np.mean([node.confidence for node in root_nodes])) if root_nodes else 0.0
         coherence_score = self._calculate_coherence_score(root_nodes, relationships)
         completeness_score = self._calculate_completeness_score(root_nodes, elements)
         
@@ -254,7 +254,7 @@ class StructureGenerator:
             return None
         
         title = "Timeline: Process Flow"
-        confidence = np.mean([node.confidence for node in timeline_nodes])
+        confidence = float(np.mean([node.confidence for node in timeline_nodes])) if timeline_nodes else 0.0
         
         return DocumentStructure(
             structure_id="timeline_001",
@@ -322,7 +322,7 @@ class StructureGenerator:
             root_nodes.append(process_section)
         
         title = "Process Documentation"
-        confidence = np.mean([node.confidence for node in root_nodes]) if root_nodes else 0.0
+        confidence = float(np.mean([node.confidence for node in root_nodes])) if root_nodes else 0.0
         
         return DocumentStructure(
             structure_id="process_001",
@@ -455,7 +455,7 @@ class StructureGenerator:
         for node in structure.root_nodes:
             lines.extend(self._format_node_as_text(node, prefix=""))
         
-        lines.append(f"\n---")
+        lines.append("\n---")
         lines.append(f"Structure Type: {structure.structure_type.value}")
         lines.append(f"Confidence: {structure.confidence:.2f}")
         lines.append(f"Coherence: {structure.coherence_score:.2f}")

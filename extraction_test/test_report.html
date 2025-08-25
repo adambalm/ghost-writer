@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Extraction and Transcription Test Results</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .header { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .result { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .image-container { margin: 20px 0; }
+        img { max-width: 100%; border: 1px solid #ddd; border-radius: 4px; }
+        .metadata { background: #f9f9f9; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .transcription { background: #e8f4f8; padding: 15px; border-radius: 4px; margin: 10px 0; }
+        .success { color: green; }
+        .failure { color: red; }
+        h1 { color: #333; }
+        h2 { color: #555; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Supernote Extraction and Transcription Test</h1>
+        <p>Test Date: 2025-08-19 02:27:22</p>
+        <p>Note File: joe.note</p>
+    </div>
+
+    <div class="result">
+        <h2>Page 1 - white background</h2>
+        
+        <div class="metadata">
+            <strong>Image Details:</strong><br>
+            Size: 2808x3744 pixels<br>
+            Content Pixels: 1,776<br>
+            Mean Brightness: 255.0<br>
+            Status: <span class="success">
+                Has Content
+            </span>
+        </div>
+        
+        <div class="image-container">
+            <img src="page_1_white_bg.png" alt="Page 1 white">
+        </div>
+
+        <div class="transcription">
+            <strong>Transcription (Ollama qwen2.5vl:7b):</strong><br>
+            Processing Time: 4.04s<br>
+            <p>NO TEXT DETECTED</p>
+        </div>
+</div>
+    <div class="result">
+        <h2>Page 1 - lightgray background</h2>
+        
+        <div class="metadata">
+            <strong>Image Details:</strong><br>
+            Size: 2808x3744 pixels<br>
+            Content Pixels: 3,444<br>
+            Mean Brightness: 255.0<br>
+            Status: <span class="success">
+                Has Content
+            </span>
+        </div>
+        
+        <div class="image-container">
+            <img src="page_1_gray_bg.png" alt="Page 1 lightgray">
+        </div>
+
+        <div class="transcription">
+            <strong>Transcription (Ollama qwen2.5vl:7b):</strong><br>
+            Processing Time: 2.39s<br>
+            <p>NO TEXT DETECTED</p>
+        </div>
+</div>
+    <div class="result">
+        <h2>Page 2 - white background</h2>
+        
+        <div class="metadata">
+            <strong>Image Details:</strong><br>
+            Size: 2808x3744 pixels<br>
+            Content Pixels: 9,302<br>
+            Mean Brightness: 254.9<br>
+            Status: <span class="success">
+                Has Content
+            </span>
+        </div>
+        
+        <div class="image-container">
+            <img src="page_2_white_bg.png" alt="Page 2 white">
+        </div>
+
+        <div class="transcription">
+            <strong>Transcription (Ollama qwen2.5vl:7b):</strong><br>
+            Processing Time: 2.29s<br>
+            <p>NO TEXT DETECTED</p>
+        </div>
+</div>
+    <div class="result">
+        <h2>Page 2 - lightgray background</h2>
+        
+        <div class="metadata">
+            <strong>Image Details:</strong><br>
+            Size: 2808x3744 pixels<br>
+            Content Pixels: 18,090<br>
+            Mean Brightness: 254.9<br>
+            Status: <span class="success">
+                Has Content
+            </span>
+        </div>
+        
+        <div class="image-container">
+            <img src="page_2_gray_bg.png" alt="Page 2 lightgray">
+        </div>
+</div>
+</body>
+</html>

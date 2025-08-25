@@ -1,0 +1,68 @@
+{
+  "extraction": [
+    {
+      "page": 1,
+      "background": "white",
+      "path": "/home/ed/ghost-writer/extraction_test/page_1_white_bg.png",
+      "width": 2808,
+      "height": 3744,
+      "content_pixels": 1776,
+      "mean_brightness": 254.98306578274526,
+      "has_content": true,
+      "stroke_count": 0
+    },
+    {
+      "page": 1,
+      "background": "lightgray",
+      "path": "/home/ed/ghost-writer/extraction_test/page_1_gray_bg.png",
+      "width": 2808,
+      "height": 3744,
+      "content_pixels": 3444,
+      "mean_brightness": 254.98306578274526,
+      "has_content": true,
+      "stroke_count": 0
+    },
+    {
+      "page": 2,
+      "background": "white",
+      "path": "/home/ed/ghost-writer/extraction_test/page_2_white_bg.png",
+      "width": 2808,
+      "height": 3744,
+      "content_pixels": 9302,
+      "mean_brightness": 254.91074750940535,
+      "has_content": true,
+      "stroke_count": 0
+    },
+    {
+      "page": 2,
+      "background": "lightgray",
+      "path": "/home/ed/ghost-writer/extraction_test/page_2_gray_bg.png",
+      "width": 2808,
+      "height": 3744,
+      "content_pixels": 18090,
+      "mean_brightness": 254.91074750940535,
+      "has_content": true,
+      "stroke_count": 0
+    }
+  ],
+  "transcription": {
+    "1_white": {
+      "transcription": "NO TEXT DETECTED",
+      "processing_time": 4.0358710289001465,
+      "model": "qwen2.5vl:7b",
+      "success": false
+    },
+    "1_lightgray": {
+      "transcription": "NO TEXT DETECTED",
+      "processing_time": 2.3932230472564697,
+      "model": "qwen2.5vl:7b",
+      "success": false
+    },
+    "2_white": {
+      "transcription": "NO TEXT DETECTED",
+      "processing_time": 2.2869882583618164,
+      "model": "qwen2.5vl:7b",
+      "success": false
+    }
+  }
+}

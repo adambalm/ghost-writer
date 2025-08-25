@@ -24,6 +24,13 @@ pytest-asyncio>=0.21.0
 black>=23.0.0
 flake8>=6.0.0
 pre-commit>=3.0.0
+mypy>=1.11.0
+ruff>=0.4.0
+
+# Type stubs for mypy
+types-requests>=2.32.0
+types-PyYAML>=6.0.0
+types-psutil>=7.0.0
 
 # PyYAML==6.0.1 - already installed system-wide
 # click==8.1.6 - already installed system-wide  
