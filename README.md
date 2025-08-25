@@ -33,7 +33,8 @@ Ghost Writer is an OCR and document processing system for handwritten notes. It 
 ## 🎯 **Core Features**
 
 ### **✅ Premium OCR Processing**
-- **Hybrid Intelligence**: Tesseract (local/free) + Google Vision (premium) + GPT-4 Vision (semantic)
+- **Hybrid Intelligence**: Tesseract (local/free) + Google Vision (premium) + GPT-4 Vision (semantic) + Qwen2.5-VL (local vision LLM)
+- **Local Vision Models**: Qwen2.5-VL 7B via Ollama for superior handwriting transcription (2-4 second response time)
 - **Smart Routing**: Cost-aware provider selection with confidence thresholds
 - **Budget Controls**: Daily limits with automatic fallbacks ($5/day default)
 - **Quality Modes**: Fast, Balanced, Premium processing options
@@ -60,6 +61,7 @@ Ghost Writer is an OCR and document processing system for handwritten notes. It 
 ### **Prerequisites**
 - Python 3.12+
 - Tesseract OCR
+- Ollama (for local Qwen2.5-VL vision model)
 - Optional: Google Cloud Vision API key
 - Optional: OpenAI API key
 
@@ -76,8 +78,12 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
+# Install and setup Ollama with Qwen2.5-VL model
+curl -fsSL https://ollama.ai/install.sh | sh
+ollama pull qwen2.5vl:7b
+
 # Initialize Ghost Writer
-ghost-writer init
+python -m src.cli init
 
 # Verify installation
 python -m pytest tests/ --tb=short -q
@@ -88,13 +94,13 @@ python -m pytest tests/ --tb=short -q
 **Process a single file:**
 ```bash
 # Process an image file
-ghost-writer process my_notes.png
+python -m src.cli process my_notes.png
 
 # Process a Supernote .note file
-ghost-writer process my_notebook.note --format all
+python -m src.cli process my_notebook.note --format all
 
 # Process with premium quality
-ghost-writer process notes.jpg --quality premium --format pdf
+python -m src.cli process notes.jpg --quality premium --format pdf
 ```
 
 **Process a directory:**

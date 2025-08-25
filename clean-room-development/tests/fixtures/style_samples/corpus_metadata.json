@@ -1,0 +1,32 @@
+[
+  {
+    "filename": "style_sample_1.txt",
+    "path": "/home/ed/ghost-writer/tests/fixtures/style_samples/style_sample_1.txt",
+    "word_count": 39,
+    "char_count": 279
+  },
+  {
+    "filename": "style_sample_2.txt",
+    "path": "/home/ed/ghost-writer/tests/fixtures/style_samples/style_sample_2.txt",
+    "word_count": 42,
+    "char_count": 266
+  },
+  {
+    "filename": "style_sample_3.txt",
+    "path": "/home/ed/ghost-writer/tests/fixtures/style_samples/style_sample_3.txt",
+    "word_count": 40,
+    "char_count": 267
+  },
+  {
+    "filename": "style_sample_4.txt",
+    "path": "/home/ed/ghost-writer/tests/fixtures/style_samples/style_sample_4.txt",
+    "word_count": 39,
+    "char_count": 252
+  },
+  {
+    "filename": "style_sample_5.txt",
+    "path": "/home/ed/ghost-writer/tests/fixtures/style_samples/style_sample_5.txt",
+    "word_count": 32,
+    "char_count": 229
+  }
+]

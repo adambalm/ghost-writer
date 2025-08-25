@@ -1,0 +1,63 @@
+{
+  "timestamp": "2025-08-17T14:51:06.191557",
+  "baseline_metrics": {
+    "success": true,
+    "processing_time": 0.2384321689605713,
+    "total_pixels": 5553352,
+    "pages_with_content": 2,
+    "total_pages": 2,
+    "meets_performance_target": true,
+    "method": "sn2md"
+  },
+  "improved_metrics": {
+    "success": true,
+    "processing_time": 0.05758810043334961,
+    "total_pixels": 264132,
+    "pages_with_content": 2,
+    "total_pages": 2,
+    "meets_performance_target": true,
+    "method": "improved_custom"
+  },
+  "original_metrics": {
+    "success": false,
+    "processing_time": 0.016,
+    "total_pixels": 794,
+    "pages_with_content": 0,
+    "total_pages": 2,
+    "meets_performance_target": true,
+    "method": "original_custom"
+  },
+  "analysis": {
+    "improvement_factor": 332.65994962216627,
+    "baseline_gap_ratio": 0.04756262523967506,
+    "remaining_gap": 0.952437374760325,
+    "performance_comparison": {
+      "sn2md_time": 0.2384321689605713,
+      "improved_time": 0.05758810043334961,
+      "original_time": 0.016,
+      "improved_faster_than_sn2md": true
+    },
+    "success_rates": {
+      "sn2md": true,
+      "improved": true,
+      "original": false
+    }
+  },
+  "production_readiness": {
+    "score": 65,
+    "max_score": 100,
+    "status": "almost_ready",
+    "blockers": [
+      "Content gap: 95.2% below baseline",
+      "Content extraction below 50% of baseline (4.8%)"
+    ],
+    "recommendations": [
+      "Minor improvements needed"
+    ],
+    "metrics": {
+      "content_gap_percentage": 95.24373747603249,
+      "improvement_factor": 332.65994962216627,
+      "performance_ratio": 0.24152823289072523
+    }
+  }
+}

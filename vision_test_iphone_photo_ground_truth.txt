@@ -1,0 +1,8 @@
+Image: iPhone Photo (Ground Truth)
+Path: /home/ed/ghost-writer/iphone_photo.png
+Expected: Should read handwriting clearly
+Cost: $0.0104
+========================================
+The handwritten text in the image reads:
+
+"The first thing Joe Kihiro wanted everybody to know was that he was Italian. No one ever believed him. He had his mother's round face and Korean eyes, but he spoke like his Dad. Like his dad he had a temper and wasn't afraid to lose it in public. The first day I saw him he was sitting on the swings in the"

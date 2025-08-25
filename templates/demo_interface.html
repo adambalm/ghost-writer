@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supernote Live Demo - Ghost Writer</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+        }
+        
+        .control-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .demo-toggle {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e0;
+            transition: .4s;
+            border-radius: 30px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+        
+        .demo-label {
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .demo-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #f7fafc;
+            color: #718096;
+        }
+        
+        .demo-status.active {
+            background: #f0fff4;
+            color: #22c55e;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .sync-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .btn-secondary:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+        }
+        
+        .last-check {
+            font-size: 12px;
+            color: #718096;
+        }
+        
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .note-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            border: 3px solid transparent;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+        
+        .note-card.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .note-card.fresh {
+            animation: glow 2s infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+            50% { box-shadow: 0 4px 30px rgba(245, 158, 11, 0.4); }
+        }
+        
+        .fresh-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        
+        .note-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .note-meta {
+            font-size: 13px;
+            color: #718096;
+            line-height: 1.6;
+        }
+        
+        .note-checkbox {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 24px;
+            height: 24px;
+        }
+        
+        .process-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .selected-count {
+            font-size: 18px;
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+        
+        .selected-count span {
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .btn-process {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 16px 40px;
+            font-size: 16px;
+        }
+        
+        .btn-process:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-process:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results-container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .result-item {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            padding: 30px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-image {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .result-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .result-content {
+            padding: 20px 0;
+        }
+        
+        .result-header {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .transcription-box {
+            background: #f0fff4;
+            border-left: 4px solid #22c55e;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .transcription-text {
+            color: #1a202c;
+            line-height: 1.8;
+            font-size: 15px;
+        }
+        
+        .transcription-meta {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #718096;
+        }
+        
+        .confidence-badge {
+            background: #f0f4ff;
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .transcribe-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .loading-content {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: #4a5568;
+            font-size: 16px;
+        }
+        
+        .auth-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: none;
+        }
+        
+        .auth-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .form-group {
+            flex: 1;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="title">🚀 Ghost Writer - Live Supernote Demo</h1>
+            <p class="subtitle">Real-time note sync and AI transcription showcase</p>
+        </div>
+
+        <!-- Authentication (hidden by default, shown if needed) -->
+        <div class="auth-section" id="authSection">
+            <h3 style="margin-bottom: 20px;">Connect to Supernote Cloud</h3>
+            <div class="auth-form">
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" class="form-input" id="phoneInput" value="4139491742" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="passwordInput" placeholder="Enter password" />
+                </div>
+                <button class="btn btn-primary" onclick="authenticate()">Connect</button>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="demo-toggle">
+                <div class="demo-label">
+                    🎬 Demo Mode
+                    <span id="demoStatus" class="demo-status">OFF</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="demoToggle" onchange="toggleDemoMode()">
+                    <span class="slider"></span>
+                </label>
+                <span style="font-size: 13px; color: #718096;">
+                    Auto-checks every 15 seconds when ON
+                </span>
+            </div>
+            
+            <div class="sync-controls">
+                <button class="btn btn-primary" onclick="checkForNotes()">
+                    🔄 Check for New Notes
+                </button>
+                <div class="last-check" id="lastCheck">Never checked</div>
+            </div>
+        </div>
+
+        <!-- Notes Grid -->
+        <div id="notesSection" style="display: none;">
+            <h2 style="color: white; margin-bottom: 20px; font-size: 24px;">
+                📝 Available Notes
+                <span id="freshCount" style="display: none; margin-left: 15px; background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px;">
+                    0 new
+                </span>
+            </h2>
+            <div class="notes-grid" id="notesGrid">
+                <!-- Note cards will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Process Section -->
+        <div class="process-section" id="processSection" style="display: none;">
+            <div class="selected-count">
+                <span id="selectedCount">0</span> notes selected for processing
+            </div>
+            <button class="btn btn-process" id="processBtn" onclick="processSelectedNotes()" disabled>
+                ⚡ Process Selected Notes
+            </button>
+        </div>
+
+        <!-- Results -->
+        <div class="results-container" id="resultsContainer" style="display: none;">
+            <h2 style="margin-bottom: 30px; color: #2d3748;">📊 Processing Results</h2>
+            <div id="results">
+                <!-- Results will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loadingText">Processing...</div>
+        </div>
+    </div>
+
+    <!-- API Key Modal -->
+    <div id="apiKeyModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1001; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 16px; padding: 30px; max-width: 400px;">
+            <h3 style="margin-bottom: 20px;">Enter OpenAI API Key</h3>
+            <input type="password" id="apiKeyInput" class="form-input" placeholder="sk-..." style="margin-bottom: 20px;">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="submitApiKey()">Submit</button>
+                <button class="btn btn-secondary" onclick="closeApiKeyModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Socket.IO
+        const socket = io();
+        
+        let selectedNotes = new Set();
+        let currentResults = [];
+        let demoModeActive = false;
+        let lastCheckTime = null;
+        
+        // Socket event listeners
+        socket.on('connect', () => {
+            console.log('Connected to server');
+            checkAuthAndLoadNotes();
+        });
+        
+        socket.on('notes_updated', (data) => {
+            console.log('Notes updated:', data);
+            displayNotes(data.notes);
+            updateLastCheck(data.last_check);
+            
+            if (data.fresh_count > 0) {
+                document.getElementById('freshCount').style.display = 'inline-block';
+                document.getElementById('freshCount').textContent = `${data.fresh_count} new`;
+                
+                // Show notification
+                showNotification(`🔥 ${data.fresh_count} new note(s) detected!`);
+            }
+        });
+        
+        socket.on('processing_progress', (data) => {
+            document.getElementById('loadingText').textContent = 
+                `Processing ${data.note_name} (${data.current}/${data.total})...`;
+        });
+        
+        function toggleDemoMode() {
+            const toggle = document.getElementById('demoToggle');
+            const status = document.getElementById('demoStatus');
+            
+            fetch('/toggle_demo_mode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enable: toggle.checked })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    demoModeActive = data.mode === 'demo';
+                    status.textContent = demoModeActive ? 'ON - 15s' : 'OFF';
+                    status.className = demoModeActive ? 'demo-status active' : 'demo-status';
+                    
+                    showNotification(data.message);
+                }
+            });
+        }
+        
+        function checkForNotes() {
+            showLoading('Checking for new notes...');
+            
+            fetch('/check_notes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    displayNotes(data.notes);
+                    updateLastCheck(data.last_check);
+                    
+                    if (data.fresh_count > 0) {
+                        showNotification(`Found ${data.fresh_count} new note(s)!`);
+                    } else {
+                        showNotification('No new notes found');
+                    }
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showNotification('Error checking notes: ' + error.message, 'error');
+            });
+        }
+        
+        function authenticate() {
+            const phone = document.getElementById('phoneInput').value;
+            const password = document.getElementById('passwordInput').value;
+            
+            if (!password) {
+                showNotification('Please enter password', 'error');
+                return;
+            }
+            
+            showLoading('Authenticating...');
+            
+            fetch('/authenticate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    document.getElementById('authSection').style.display = 'none';
+                    showNotification('Connected to Supernote Cloud!');
+                    checkForNotes();
+                } else {
+                    showNotification('Authentication failed', 'error');
+                }
+            });
+        }
+        
+        function checkAuthAndLoadNotes() {
+            // Try to load notes, show auth if needed
+            fetch('/get_notes')
+            .then(response => response.json())
+            .then(data => {
+                if (data.notes && data.notes.length > 0) {
+                    displayNotes(data.notes);
+                    document.getElementById('notesSection').style.display = 'block';
+                } else {
+                    // Check for new notes first time
+                    checkForNotes();
+                }
+            });
+        }
+        
+        function displayNotes(notes) {
+            const grid = document.getElementById('notesGrid');
+            grid.innerHTML = '';
+            
+            if (!notes || notes.length === 0) {
+                grid.innerHTML = '<div style="color: white; text-align: center; grid-column: 1/-1;">No notes found. Write a note on your Supernote and sync!</div>';
+                return;
+            }
+            
+            document.getElementById('notesSection').style.display = 'block';
+            
+            notes.forEach(note => {
+                const card = document.createElement('div');
+                card.className = `note-card ${note.is_fresh ? 'fresh' : ''} ${selectedNotes.has(note.id) ? 'selected' : ''}`;
+                
+                const modTime = new Date(note.modified_time * 1000);
+                const timeAgo = getTimeAgo(modTime);
+                
+                card.innerHTML = `
+                    ${note.is_fresh ? '<div class="fresh-badge">🔥 FRESH</div>' : ''}
+                    <div class="note-title">${note.name.replace('.note', '')}</div>
+                    <div class="note-meta">
+                        📄 ${note.page_count} page${note.page_count > 1 ? 's' : ''}<br>
+                        📊 ${formatFileSize(note.size)}<br>
+                        🕐 ${timeAgo}
+                    </div>
+                    <input type="checkbox" class="note-checkbox" 
+                           ${selectedNotes.has(note.id) ? 'checked' : ''}
+                           onclick="toggleNoteSelection('${note.id}', event)">
+                `;
+                
+                card.onclick = (e) => {
+                    if (!e.target.classList.contains('note-checkbox')) {
+                        toggleNoteSelection(note.id);
+                    }
+                };
+                
+                grid.appendChild(card);
+            });
+            
+            updateProcessButton();
+        }
+        
+        function toggleNoteSelection(noteId, event) {
+            if (event) event.stopPropagation();
+            
+            if (selectedNotes.has(noteId)) {
+                selectedNotes.delete(noteId);
+            } else {
+                selectedNotes.add(noteId);
+            }
+            
+            // Update UI
+            const cards = document.querySelectorAll('.note-card');
+            cards.forEach(card => {
+                const checkbox = card.querySelector('.note-checkbox');
+                if (checkbox && checkbox.onclick.toString().includes(noteId)) {
+                    if (selectedNotes.has(noteId)) {
+                        card.classList.add('selected');
+                        checkbox.checked = true;
+                    } else {
+                        card.classList.remove('selected');
+                        checkbox.checked = false;
+                    }
+                }
+            });
+            
+            updateProcessButton();
+        }
+        
+        function updateProcessButton() {
+            const count = selectedNotes.size;
+            document.getElementById('selectedCount').textContent = count;
+            
+            const btn = document.getElementById('processBtn');
+            btn.disabled = count === 0;
+            
+            if (count > 0) {
+                document.getElementById('processSection').style.display = 'block';
+            } else {
+                document.getElementById('processSection').style.display = 'none';
+            }
+        }
+        
+        function processSelectedNotes() {
+            if (selectedNotes.size === 0) return;
+            
+            showLoading('Processing notes...');
+            currentResults = [];
+            
+            fetch('/process_notes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ note_ids: Array.from(selectedNotes) })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    currentResults = data.results;
+                    displayResults(data.results);
+                    showNotification(`Processed ${data.processed_count} note(s) successfully!`);
+                } else {
+                    showNotification('Processing failed: ' + data.error, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showNotification('Error: ' + error.message, 'error');
+            });
+        }
+        
+        function displayResults(results) {
+            const container = document.getElementById('resultsContainer');
+            const resultsDiv = document.getElementById('results');
+            
+            container.style.display = 'block';
+            resultsDiv.innerHTML = '';
+            
+            results.forEach((result, index) => {
+                if (!result.has_content) return;
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                
+                resultItem.innerHTML = `
+                    <div class="result-image">
+                        <img src="/images/${result.image_path}" alt="Page ${result.page}">
+                    </div>
+                    <div class="result-content">
+                        <div class="result-header">
+                            ${result.note_name} - Page ${result.page}
+                        </div>
+                        <div id="transcription-${index}">
+                            ${result.transcription ? 
+                                `<div class="transcription-box">
+                                    <div class="transcription-text">${result.transcription}</div>
+                                    <div class="transcription-meta">
+                                        <span>Provider: ${result.provider || 'Unknown'}</span>
+                                        <span class="confidence-badge">Confidence: ${Math.round((result.confidence || 0.9) * 100)}%</span>
+                                    </div>
+                                </div>` :
+                                `<div class="transcribe-buttons">
+                                    <button class="btn btn-secondary" onclick="transcribeLocal(${index})">
+                                        🖥️ Transcribe (Local/Free)
+                                    </button>
+                                    <button class="btn btn-primary" onclick="transcribeOpenAI(${index})">
+                                        ☁️ Transcribe (OpenAI)
+                                    </button>
+                                </div>`
+                            }
+                        </div>
+                    </div>
+                `;
+                
+                resultsDiv.appendChild(resultItem);
+            });
+        }
+        
+        function transcribeLocal(index) {
+            const result = currentResults[index];
+            showLoading('Transcribing with local model...');
+            
+            fetch('/transcribe_local', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    image_path: result.image_path,
+                    note_id: result.note_id,
+                    page_number: result.page
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.transcription) {
+                    currentResults[index].transcription = data.transcription;
+                    currentResults[index].provider = data.provider;
+                    currentResults[index].confidence = data.confidence;
+                    displayResults(currentResults);
+                    showNotification(`Transcribed in ${data.processing_time}s (FREE)`);
+                } else {
+                    showNotification('Transcription failed: ' + data.error, 'error');
+                }
+            });
+        }
+        
+        function transcribeOpenAI(index) {
+            // Show API key modal
+            document.getElementById('apiKeyModal').style.display = 'flex';
+            window.currentTranscribeIndex = index;
+        }
+        
+        function submitApiKey() {
+            const apiKey = document.getElementById('apiKeyInput').value;
+            if (!apiKey) {
+                showNotification('Please enter API key', 'error');
+                return;
+            }
+            
+            closeApiKeyModal();
+            
+            const index = window.currentTranscribeIndex;
+            const result = currentResults[index];
+            
+            showLoading('Transcribing with OpenAI...');
+            
+            fetch('/transcribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    image_path: result.image_path,
+                    api_key: apiKey,
+                    note_id: result.note_id,
+                    page_number: result.page
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.transcription) {
+                    currentResults[index].transcription = data.transcription;
+                    currentResults[index].provider = data.provider;
+                    currentResults[index].confidence = data.confidence;
+                    currentResults[index].cost = data.cost;
+                    displayResults(currentResults);
+                    showNotification(`Transcribed successfully (Cost: $${data.cost})`);
+                } else {
+                    showNotification('Transcription failed: ' + data.error, 'error');
+                }
+            });
+        }
+        
+        function closeApiKeyModal() {
+            document.getElementById('apiKeyModal').style.display = 'none';
+            document.getElementById('apiKeyInput').value = '';
+        }
+        
+        function updateLastCheck(timestamp) {
+            lastCheckTime = new Date(timestamp);
+            const element = document.getElementById('lastCheck');
+            element.textContent = `Last check: ${getTimeAgo(lastCheckTime)}`;
+        }
+        
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            
+            if (seconds < 60) return 'just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+            return `${Math.floor(seconds / 86400)} days ago`;
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return Math.round(bytes / 1024) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+        
+        function showLoading(text) {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+        
+        function showNotification(message, type = 'success') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 16px 24px;
+                background: ${type === 'error' ? '#ef4444' : '#22c55e'};
+                color: white;
+                border-radius: 12px;
+                font-weight: 600;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                z-index: 2000;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        // Add animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Update last check time every second
+        setInterval(() => {
+            if (lastCheckTime) {
+                updateLastCheck(lastCheckTime.toISOString());
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

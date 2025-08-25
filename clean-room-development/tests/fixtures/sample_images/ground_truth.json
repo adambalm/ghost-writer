@@ -1,0 +1,37 @@
+[
+  {
+    "filename": "sample_1.png",
+    "text": "This is a sample handwritten note for testing OCR functionality.",
+    "path": "/home/ed/ghost-writer/tests/fixtures/sample_images/sample_1.png",
+    "expected_words": 10,
+    "expected_chars": 64
+  },
+  {
+    "filename": "sample_2.png",
+    "text": "Ghost Writer processes handwritten notes into digital text.",
+    "path": "/home/ed/ghost-writer/tests/fixtures/sample_images/sample_2.png",
+    "expected_words": 8,
+    "expected_chars": 59
+  },
+  {
+    "filename": "sample_3.png",
+    "text": "Machine learning models help analyze writing patterns and style.",
+    "path": "/home/ed/ghost-writer/tests/fixtures/sample_images/sample_3.png",
+    "expected_words": 9,
+    "expected_chars": 64
+  },
+  {
+    "filename": "sample_4.png",
+    "text": "The quick brown fox jumps over the lazy dog.",
+    "path": "/home/ed/ghost-writer/tests/fixtures/sample_images/sample_4.png",
+    "expected_words": 9,
+    "expected_chars": 44
+  },
+  {
+    "filename": "sample_5.png",
+    "text": "Testing various text lengths and complexity levels.",
+    "path": "/home/ed/ghost-writer/tests/fixtures/sample_images/sample_5.png",
+    "expected_words": 7,
+    "expected_chars": 51
+  }
+]

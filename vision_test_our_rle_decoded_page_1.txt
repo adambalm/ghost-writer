@@ -1,0 +1,6 @@
+Image: Our RLE Decoded Page 1
+Path: /home/ed/ghost-writer/fixed_Page1_MainLayer.png
+Expected: Should show handwriting strokes if decoder works
+Cost: $0.0081
+========================================
+BLANK IMAGE
