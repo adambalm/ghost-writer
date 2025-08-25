@@ -35,7 +35,7 @@ RESULTS_FOLDER.mkdir(exist_ok=True)
 
 # Global state
 authenticated = False
-cloud_files = []
+cloud_files: list = []
 last_sync_time = None
 
 

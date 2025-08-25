@@ -17,6 +17,16 @@ SUPERNOTE_PASSWORD = os.getenv('SUPERNOTE_PASSWORD', 'z8UrxJWlqWH0Ep')
 BASE_URL = "http://localhost:5000"
 PROJECT_ROOT = Path(__file__).parent.parent
 
+# Skip web tests in CI environment
+pytestmark = [
+    pytest.mark.web,
+    pytest.mark.skipif(
+        os.getenv('CI') == 'true' or os.getenv('GITHUB_ACTIONS') == 'true',
+        reason="Web tests disabled in CI environment"
+    )
+]
+
+@pytest.mark.web
 class TestE2EProcessing:
     """End-to-end processing tests"""
     

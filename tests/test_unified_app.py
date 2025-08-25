@@ -16,6 +16,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from web.unified_app import app
 
+# Mark web app tests
+pytestmark = pytest.mark.web
 
 class TestUnifiedWebApp:
     """Test unified web application endpoints"""
