@@ -7,7 +7,7 @@
 1. Start the web server:
    ```bash
    source .venv/bin/activate
-   python run_enhanced_viewer.py
+   python enhanced_web_viewer.py
    ```
 
 2. Open your browser to: http://localhost:5001
@@ -53,8 +53,8 @@ ghost-writer/
 ├── templates/              # Web interface templates
 ├── archive/                # Old/experimental code (archived)
 ├── enhanced_web_viewer.py  # Web interface backend
-├── run_enhanced_viewer.py  # Web interface launcher
-└── verify_auth.py         # Authentication test script
+├── scripts/               # Utility scripts for testing and deployment
+└── memory-bank/           # Persistent project context
 ```
 
 ## Features

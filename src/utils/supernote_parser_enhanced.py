@@ -17,6 +17,7 @@ from enum import Enum, auto
 
 import numpy as np
 from PIL import Image, ImageDraw
+from .exceptions import SupernoteParsingError, FileProcessingError
 
 logger = logging.getLogger(__name__)
 
