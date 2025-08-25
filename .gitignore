@@ -10,23 +10,17 @@ dist/
 build/
 venv/
 .venv/
-.env
-.env.*
-config/*.json
-__pycache__/
-.pytest_cache/
-*.db
-*.sqlite
 data/
 logs/
 
-# test backups
-*.bak
-*.broken.*
-
-# test backups
+# Test backups
 *.bak
 *.broken.*
 
 # CI artifacts
 .handoff/
+
+# SSL certificates private keys (keep public certs for documentation)
+ssl-certs/ca-private-key.pem
+ssl-certs/server-private-key.pem
+ssl-certs/*.csr
