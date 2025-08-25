@@ -50,7 +50,7 @@ class Relationship:
 class RelationshipDetector:
     """Detects relationships between elements in handwritten notes"""
     
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         self.config = config or {}
         self.proximity_threshold = self.config.get('proximity_threshold', 50)
         self.arrow_patterns = self._compile_arrow_patterns()
@@ -256,7 +256,10 @@ class RelationshipDetector:
                                  pattern: re.Pattern) -> Optional[Relationship]:
         """Create an arrow relationship with proper direction"""
         # Determine arrow direction based on pattern and spatial relationship
-        arrow_text = pattern.search(source.text).group()
+        match = pattern.search(source.text)
+        if not match:
+            return None
+        arrow_text = match.group()
         
         # Simple direction detection based on arrow symbols
         if any(symbol in arrow_text for symbol in ['→', '->', '=>', '⇒']):
@@ -372,7 +375,7 @@ class RelationshipDetector:
     
     def get_relationship_graph(self, relationships: List[Relationship]) -> Dict[str, List[str]]:
         """Convert relationships to a simple adjacency graph"""
-        graph = {}
+        graph: Dict[str, List[str]] = {}
         
         for rel in relationships:
             if rel.source_id not in graph:
@@ -386,7 +389,7 @@ class RelationshipDetector:
         """Find clusters of related elements"""
         # Simple clustering based on relationship connections
         clusters = []
-        visited = set()
+        visited: Set[str] = set()
         
         graph = self.get_relationship_graph(relationships)
         

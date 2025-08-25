@@ -63,7 +63,7 @@ class SupernotePage:
     height: int
     strokes: List[SupernoteStroke]
     background_type: int = 0
-    metadata: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 
 class SupernoteParser:
@@ -247,6 +247,8 @@ class SupernoteParser:
                     if bitmap_data:
                         # Store decoded bitmap for image rendering
                         decoded_bitmap = self._decode_ratta_rle(bitmap_data, 1404, 1872)
+                        if page.metadata is None:
+                            page.metadata = {}
                         page.metadata['decoded_bitmap'] = decoded_bitmap
                         page.metadata['has_content'] = np.sum(decoded_bitmap < 255) > 0
                         page.metadata['actual_bitmap_size'] = len(bitmap_data)
@@ -387,13 +389,13 @@ class SupernoteParser:
             return self._extract_layer_info_original(data)
         
         # Supplement with dynamic parsing for additional layers
-        dynamic_layers = self._find_additional_layers(data, known_addresses.keys())
+        dynamic_layers = self._find_additional_layers(data, set(known_addresses.keys()))
         layers.extend(dynamic_layers)
         
         logger.info(f"Enhanced extraction: found {len(layers)} total layers")
         return layers
     
-    def _find_additional_layers(self, data: bytes, known_addresses: set) -> List[Dict[str, Any]]:
+    def _find_additional_layers(self, data: bytes, known_addresses: set[int]) -> List[Dict[str, Any]]:
         """Find additional layers beyond the known addresses"""
         
         additional_layers = []
@@ -458,7 +460,7 @@ class SupernoteParser:
     def _extract_layer_info_original(self, data: bytes) -> List[Dict[str, Any]]:
         """Original layer extraction method as fallback"""
         
-        layers = []
+        layers: List[Dict[str, Any]] = []
         pos = 0
         
         logger.debug(f"Scanning {len(data)} bytes for layer metadata...")
@@ -584,7 +586,7 @@ class SupernoteParser:
         logger.warning("Using fallback hardcoded layer positions")
         
         # Original hardcoded positions as fallback
-        layers = [
+        layers: List[Dict[str, Any]] = [
             {"name": "Page1_MainLayer", "pos": 1091, "bitmap_size": 758, "source": "hardcoded"},
             {"name": "Page1_Background", "pos": 1222, "bitmap_size": 430, "source": "hardcoded"},
             {"name": "Page2_MainLayer", "pos": 9408, "bitmap_size": 9075, "source": "hardcoded"},
@@ -594,7 +596,7 @@ class SupernoteParser:
         # Filter to only return layers that exist in the data
         valid_layers = []
         for layer in layers:
-            if layer['pos'] + layer['bitmap_size'] <= len(data):
+            if int(layer['pos']) + int(layer['bitmap_size']) <= len(data):
                 valid_layers.append(layer)
         
         return valid_layers
@@ -1120,7 +1122,7 @@ class SupernoteParser:
             
             if bitmap_data:
                 # Decode using RLE decoder
-                decoded_bitmap = self._decode_rle_bitmap_v3(bitmap_data, layer_info)
+                decoded_bitmap = self._decode_ratta_rle(bitmap_data, 1404, 1872)
                 
                 if decoded_bitmap is not None:
                     # Convert to PIL Image - use RGBA for transparency support
@@ -1391,7 +1393,7 @@ class SupernoteParser:
             return []
         
         # Simple greedy merging
-        merged = []
+        merged: List[Tuple[int, int, int, int]] = []
         
         for box in sorted(boxes):
             x1, y1, x2, y2 = box

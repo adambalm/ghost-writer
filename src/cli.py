@@ -65,13 +65,13 @@ def process(ctx, input_path: str, output: Optional[str], format: str,
     console.print("🎯 [bold blue]Ghost Writer v2.0[/bold blue] - Processing Notes")
     console.print(f"📁 Input: {input_path}")
     
-    input_path = Path(input_path)
+    input_path_obj = Path(input_path)
     
     # Determine output directory
     if output:
         output_dir = Path(output)
     else:
-        output_dir = input_path.parent / "ghost_writer_output"
+        output_dir = input_path_obj.parent / "ghost_writer_output"
     
     output_dir.mkdir(exist_ok=True)
     console.print(f"📤 Output: {output_dir}")
@@ -80,14 +80,14 @@ def process(ctx, input_path: str, output: Optional[str], format: str,
     files_to_process = []
     supported_extensions = {".png", ".jpg", ".jpeg", ".note", ".pdf"}
     
-    if input_path.is_file():
+    if input_path_obj.is_file():
         # Check if single file has supported extension
-        if input_path.suffix.lower() in supported_extensions:
-            files_to_process = [input_path]
+        if input_path_obj.suffix.lower() in supported_extensions:
+            files_to_process = [input_path_obj]
     else:
         # Find supported file types in directory
         for ext in supported_extensions:
-            files_to_process.extend(input_path.glob(f"**/*{ext}"))
+            files_to_process.extend(input_path_obj.glob(f"**/*{ext}"))
     
     if not files_to_process:
         console.print("❌ [red]No supported files found![/red]")
@@ -236,7 +236,10 @@ def process_single_file(
         return None
     
     # Step 2: Store in database
-    db_manager.store_note(
+    import uuid
+    note_id = str(uuid.uuid4())
+    db_manager.insert_note(
+        note_id=note_id,
         source_file=str(file_path),
         raw_text=ocr_result.text,
         clean_text=ocr_result.text,
@@ -474,7 +477,7 @@ def watch(ctx, directory: str, output: Optional[str], interval: int, format: str
             from .utils.structure_generator import StructureGenerator
             from .utils.database import DatabaseManager
             
-            ocr_provider = HybridOCR()
+            ocr_provider = HybridOCR({})
             detector = RelationshipDetector()
             extractor = ConceptExtractor()
             clusterer = ConceptClusterer()
@@ -565,7 +568,7 @@ def sync(ctx, since: Optional[str], output: Optional[str]):
     
     # Create API client
     try:
-        client = create_supernote_client(config)
+        client = create_supernote_client(config._config)
         if not client:
             console.print("❌ [red]Supernote Cloud not configured[/red]")
             console.print("💡 Let's set up your Supernote credentials")
@@ -575,7 +578,7 @@ def sync(ctx, since: Optional[str], output: Optional[str]):
             password = click.prompt("Enter your Supernote password", hide_input=True, type=str)
             
             # Try again with credentials (pass them directly, not via config)
-            client = create_supernote_client(config, email=email, password=password)
+            client = create_supernote_client(config._config, email=email, password=password)
             if not client:
                 console.print("❌ [red]Authentication failed. Please check your credentials[/red]")
                 return

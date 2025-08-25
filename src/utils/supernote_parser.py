@@ -63,7 +63,7 @@ class SupernotePage:
     height: int
     strokes: List[SupernoteStroke]
     background_type: int = 0
-    metadata: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 
 class SupernoteParser:
@@ -247,6 +247,8 @@ class SupernoteParser:
                     if bitmap_data:
                         # Store decoded bitmap for image rendering
                         decoded_bitmap = self._decode_ratta_rle(bitmap_data, 1404, 1872)
+                        if page.metadata is None:
+                            page.metadata = {}
                         page.metadata['decoded_bitmap'] = decoded_bitmap
                         page.metadata['has_content'] = np.sum(decoded_bitmap < 255) > 0
                         page.metadata['actual_bitmap_size'] = len(bitmap_data)
@@ -352,7 +354,7 @@ class SupernoteParser:
         ]
         
         for layer in forensic_layers:
-            address = layer['address']
+            address = int(layer['address'])  # type: ignore
             
             # Read 4-byte size field at the address
             if address + 4 > len(data):
@@ -377,8 +379,8 @@ class SupernoteParser:
                 "address": address,
                 "data_start": data_start,
                 "bitmap_size": actual_size,
-                "layer_type": "MAINLAYER" if "MAIN" in layer['name'] else "BGLAYER",
-                "layer_name": "MAINLAYER" if "MAIN" in layer['name'] else "BGLAYER",
+                "layer_type": "MAINLAYER" if "MAIN" in str(layer['name']) else "BGLAYER",
+                "layer_name": "MAINLAYER" if "MAIN" in str(layer['name']) else "BGLAYER",
                 "source": "forensic_verified"
             }
             
@@ -448,7 +450,7 @@ class SupernoteParser:
         
         valid_layers = []
         for layer in forensic_layers:
-            address = layer['address']
+            address = int(layer['address'])  # type: ignore
             
             # Read 4-byte size field at the address
             if address + 4 <= len(data):
@@ -461,8 +463,8 @@ class SupernoteParser:
                         "address": address,
                         "data_start": data_start,
                         "bitmap_size": actual_size,
-                        "layer_type": "MAINLAYER" if "MAIN" in layer['name'] else "BGLAYER",
-                        "layer_name": "MAINLAYER" if "MAIN" in layer['name'] else "BGLAYER",
+                        "layer_type": "MAINLAYER" if "MAIN" in str(layer['name']) else "BGLAYER",
+                        "layer_name": "MAINLAYER" if "MAIN" in str(layer['name']) else "BGLAYER",
                         "source": "forensic_fallback"
                     }
                     valid_layers.append(layer_info)
@@ -575,8 +577,9 @@ class SupernoteParser:
         uncompressed = bytearray()
         
         bin_iter = iter(compressed_data)
-        holder = ()
-        waiting = []
+        holder: Tuple[int, int] = (0, 0)
+        holder_empty = True
+        waiting: List[Tuple[int, int]] = []
         
         try:
             while True:
@@ -585,9 +588,10 @@ class SupernoteParser:
                 data_pushed = False
                 
                 # Process held data from previous iteration (CRITICAL)
-                if len(holder) > 0:
+                if not holder_empty:
                     (prev_colorcode, prev_length) = holder
-                    holder = ()
+                    holder = (0, 0)
+                    holder_empty = True
                     if colorcode == prev_colorcode:
                         # CRITICAL: Combine lengths using reference formula [verified]
                         length = 1 + length + (((prev_length & 0x7f) + 1) << 7)
@@ -608,6 +612,7 @@ class SupernoteParser:
                     elif length & 0x80 != 0:
                         # High bit set: hold for next iteration (CRITICAL)
                         holder = (colorcode, length)
+                        holder_empty = False
                         # Will be processed in next loop iteration
                     else:
                         # Normal length: immediate processing
@@ -631,7 +636,7 @@ class SupernoteParser:
                         
         except StopIteration:
             # Handle final held data at end of stream [verified]
-            if len(holder) > 0:
+            if not holder_empty:
                 (colorcode, length) = holder
                 # Calculate final length to not exceed canvas
                 gap = expected_pixels - len(uncompressed)
@@ -1011,7 +1016,7 @@ class SupernoteParser:
             
             if bitmap_data:
                 # Decode using RLE decoder
-                decoded_bitmap = self._decode_rle_bitmap_v3(bitmap_data, layer_info)
+                decoded_bitmap = self._decode_ratta_rle(bitmap_data, layer_info.get('width', 1404), layer_info.get('height', 1872))
                 
                 if decoded_bitmap is not None:
                     # Convert to PIL Image - use RGBA for transparency support
@@ -1282,7 +1287,7 @@ class SupernoteParser:
             return []
         
         # Simple greedy merging
-        merged = []
+        merged: List[Tuple[int, int, int, int]] = []
         
         for box in sorted(boxes):
             x1, y1, x2, y2 = box

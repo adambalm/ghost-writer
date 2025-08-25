@@ -233,7 +233,7 @@ class DatabaseManager:
             logger.error(f"Error tracking OCR usage: {e}")
             return False
 
-    def get_daily_ocr_cost(self, date: Optional[str] = None) -> Dict[str, float]:
+    def get_daily_ocr_cost(self, date: Optional[str] = None) -> Dict[str, Dict[str, Any]]:
         """Get OCR costs by provider for a specific date (default: today)"""
         if not date:
             date = datetime.now().date().isoformat()

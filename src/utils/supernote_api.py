@@ -64,7 +64,7 @@ class SupernoteCloudAPI:
         self.credentials = credentials
         self.session = self._create_session()
         self.authenticated = False
-        self.last_error = None
+        self.last_error: Optional[Dict[str, Any]] = None
         
         logger.info("SupernoteCloudAPI initialized")
     
@@ -200,7 +200,7 @@ class SupernoteCloudAPI:
                 'device_id': self.credentials.device_id or self._generate_device_id()
             }
             
-            response = self.session.post(self.AUTH_URL, json=auth_data)
+            response = self.session.post(f"{self.BASE_URL}{self.ENDPOINTS['login']}", json=auth_data)
             
             if response.status_code == 200:
                 auth_result = response.json()
@@ -491,26 +491,6 @@ def create_supernote_client(config: Dict[str, Any], email: Optional[str] = None,
     load_dotenv()
     
     supernote_config = config.get('supernote', {})
-<<<<<<< HEAD
-
-    if not supernote_config.get('enabled', False):
-        logger.info("Supernote Cloud integration is disabled")
-        return None
-
-    def _get_env(name: str) -> str:
-        return os.environ.get(name, '')
-
-    credentials = SupernoteCredentials(
-        email=_get_env(supernote_config.get('email_env', 'SUPERNOTE_EMAIL')),
-        password=_get_env(supernote_config.get('password_env', 'SUPERNOTE_PASSWORD')),
-        access_token=_get_env(supernote_config.get('access_token_env', 'SUPERNOTE_ACCESS_TOKEN')),
-        refresh_token=_get_env(supernote_config.get('refresh_token_env', 'SUPERNOTE_REFRESH_TOKEN')),
-        device_id=_get_env(supernote_config.get('device_id_env', 'SUPERNOTE_DEVICE_ID'))
-    )
-
-    if not credentials.email or not (credentials.password or credentials.access_token):
-        logger.warning("Supernote credentials not configured in environment variables")
-=======
     
     # Check if explicitly disabled
     if supernote_config.get('enabled') is False:
@@ -536,7 +516,6 @@ def create_supernote_client(config: Dict[str, Any], email: Optional[str] = None,
     
     if not credentials.password and not credentials.access_token:
         logger.warning("No Supernote password or access token configured")
->>>>>>> chore/ignore-handoff
         return None
     
     client = SupernoteCloudAPI(credentials)

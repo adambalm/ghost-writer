@@ -90,7 +90,7 @@ class StateInspector:
     @staticmethod 
     def log_variable_state(var_name: str, value: Any, context: str = ""):
         """Log variable state with type and value info"""
-        info = {
+        info: Dict[str, Any] = {
             'variable': var_name,
             'type': type(value).__name__,
             'context': context
