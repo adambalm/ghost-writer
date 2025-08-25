@@ -14,7 +14,7 @@ python -m src.cli process test_image.png --format markdown
 ```
 
 - **What this does:**
-- Uses `SUPERNOTE_EMAIL` and `SUPERNOTE_PASSWORD` environment variables
+- Uses `SUPERNOTE_EMAIL`/`SUPERNOTE_PHONE` and `SUPERNOTE_PASSWORD` environment variables
 - Tests authentication with real API
 - Shows your files from the cloud
 - Confirms everything is working
@@ -57,7 +57,7 @@ Your handwritten notes are now:
 ## If Something Goes Wrong
 
 - **Connection issues:**
-- Check your `SUPERNOTE_EMAIL` and `SUPERNOTE_PASSWORD`
+- Check your `SUPERNOTE_EMAIL`/`SUPERNOTE_PHONE` and `SUPERNOTE_PASSWORD`
 - Make sure you can log into cloud.supernote.com in browser
 
 **No files found:**
