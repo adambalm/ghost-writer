@@ -42,8 +42,8 @@ last_check_time = None
 poll_interval = 60  # Default to 60 seconds in normal mode
 
 # Auto-auth credentials (provided by user)
-AUTO_AUTH_PHONE = "4139491742"
-AUTO_AUTH_PASSWORD = "cesterCAT50supernote"
+# Removed hardcoded credentials - use environment variables or login prompt
+# Removed hardcoded password - use environment variables or login prompt
 
 class CloudSyncManager:
     """Manages Supernote Cloud synchronization"""

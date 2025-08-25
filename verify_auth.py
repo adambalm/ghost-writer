@@ -15,7 +15,7 @@ def main():
     print("Supernote Cloud Authentication Test")
     print("-" * 40)
     print("\nEnter your Supernote Cloud credentials:")
-    print("(For US phone numbers, enter digits only, e.g., 4139491742)")
+    print("(For US phone numbers, enter digits only, e.g., 5551234567)")
     print("(For email accounts, enter your full email address)")
     
     account = input("\nAccount (phone/email): ").strip()

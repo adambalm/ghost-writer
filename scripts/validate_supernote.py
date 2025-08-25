@@ -20,7 +20,7 @@ def validate_supernote_connection():
     print()
     
     # Use the working credentials we discovered
-    phone_number = "4139491742"
+    phone_number = os.getenv('SUPERNOTE_PHONE') or input("Enter Supernote phone number: ")
     print(f"📱 Using phone number: {phone_number}")
     print("🔐 Using password: [provided securely]")
     

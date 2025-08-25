@@ -83,7 +83,7 @@ class CloudSyncManager:
         conn.commit()
         conn.close()
     
-    def authenticate(self, phone_number="4139491742", password=None):
+    def authenticate(self, phone_number=None, password=None):
         """Authenticate with Supernote Cloud"""
         try:
             # Get random code
@@ -533,7 +533,7 @@ def check_notes():
 def authenticate():
     """Authenticate with Supernote Cloud"""
     data = request.json
-    phone = data.get('phone', '4139491742')
+    phone = data.get('phone') or os.getenv('SUPERNOTE_PHONE')
     password = data.get('password')
     
     if sync_manager.authenticate(phone, password):

@@ -35,9 +35,8 @@ demo_mode_thread = None
 last_check_time = None
 supernote_token = None
 
-# Credentials for auto-auth when demo mode is enabled
-DEMO_PHONE = "4139491742"
-DEMO_PASSWORD = "cesterCAT50note"
+# Demo mode requires user to provide credentials via environment variables or login prompt
+# Never hardcode credentials in source code
 
 class SupernoteProcessor:
     def __init__(self):

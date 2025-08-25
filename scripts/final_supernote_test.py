@@ -18,7 +18,7 @@ def test_file_listing():
     print("=" * 40)
     print()
     
-    phone_number = "4139491742"  # Your working phone number
+    phone_number = os.getenv('SUPERNOTE_PHONE') or input("Enter Supernote phone number: ")
     
     try:
         from utils.supernote_api import SupernoteCloudAPI, SupernoteCredentials
@@ -35,7 +35,7 @@ def test_file_listing():
         print("\n🎉 INTEGRATION STATUS: READY FOR USE")
         print("\n📋 What's been validated:")
         print("• Supernote Cloud API connection")
-        print("• Phone number authentication (4139491742)")  
+        print("• Phone number authentication")  
         print("• Security flow (MD5+SHA256 with random salt)")
         print("• Token-based session management")
         print("• File listing endpoint accessibility")

@@ -18,7 +18,7 @@ def test_main_api():
     print("🎯 Testing Main Supernote API")
     print("=" * 40)
     
-    phone_number = "4139491742"
+    phone_number = os.getenv('SUPERNOTE_PHONE') or input("Enter Supernote phone number: ")
     password = getpass("🔐 Enter your Supernote password: ")
     
     try:
