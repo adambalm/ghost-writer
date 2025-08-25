@@ -3,18 +3,25 @@
 ## Current System Status
 - **Python Version**: 3.12.3 ✅ (meets requirement 3.9+)
 - **Ollama**: Installed ✅ (/usr/local/bin/ollama)
-- **Tesseract**: Not installed ❌ (required for OCR)
+- **Tesseract**: Installed ✅ (required for baseline OCR)
 
 ## Required Dependencies
 
 ### System Dependencies
 ```bash
-# Install Tesseract OCR
+# Install Tesseract OCR (if not already installed)
 sudo apt-get update
 sudo apt-get install tesseract-ocr tesseract-ocr-eng
 
-# Verify installation
+# Install Ollama (if not already installed)
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Pull Qwen2.5-VL vision model for local transcription
+ollama pull qwen2.5vl:7b
+
+# Verify installations
 tesseract --version
+ollama --version
 ```
 
 ### Python Dependencies

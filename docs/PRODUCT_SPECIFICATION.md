@@ -13,7 +13,7 @@ Ghost Writer is a handwritten note processing system that addresses note transcr
 1. **Privacy-Conscious Processing** – Transcription of meeting notes, research, and documents using hybrid OCR with local-first processing
 2. **Idea Organization** – Semantic relationship detection and structure generation to help organize thoughts into coherent documents
 
-The system leverages OCR APIs (Google Cloud Vision, GPT-4 Vision) with cost controls and local fallbacks, providing transcription and idea organization capabilities.
+The system leverages hybrid OCR including local vision models (Qwen2.5-VL via Ollama), cloud APIs (Google Cloud Vision, GPT-4 Vision) with cost controls and local fallbacks, providing transcription and idea organization capabilities.
 
 ## TARGET USE CASES
 
@@ -45,16 +45,19 @@ The system leverages OCR APIs (Google Cloud Vision, GPT-4 Vision) with cost cont
 
 ### Hybrid OCR Pipeline:
 ```
-Local Processing (Privacy) ──┐
-                             ├─── Smart Router ───> Best Result
-Premium APIs (Accuracy) ────┘
+Local Processing (Tesseract) ────┐
+Local Vision LLM (Qwen2.5-VL) ───┤
+                                 ├─── Smart Router ───> Best Result
+Premium APIs (Google Vision) ────┤
+Premium APIs (GPT-4 Vision) ─────┘
 ```
 
 **OCR Providers**:
-- **Tesseract**: Local, free, privacy-safe (baseline)
+- **Tesseract**: Local, free, privacy-safe (baseline traditional OCR)
+- **Qwen2.5-VL**: Local vision language model via Ollama (superior handwriting recognition, 2-4 second response)
 - **Google Cloud Vision**: Premium accuracy, $0.0015/image
 - **GPT-4 Vision**: Semantic understanding, $0.01/image  
-- **Hybrid Router**: Cost-aware quality selection
+- **Hybrid Router**: Cost-aware quality selection with automatic fallbacks
 
 **Cost Controls**:
 - Daily budget limits with automatic fallbacks

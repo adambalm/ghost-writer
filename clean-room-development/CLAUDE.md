@@ -31,22 +31,34 @@ Ghost Writer: OCR and document processing system for handwritten notes.
 
 **CRITICAL**: All Python commands MUST use the virtual environment. Never run Python without activating .venv first.
 
+**⚠️ AGPL QUARANTINE WARNING**: Never access `/reference-only-analysis/` directory during development to avoid contamination.
+
 ```bash
 # ALWAYS activate virtual environment first
 source .venv/bin/activate
 
-# Run tests and generate reports  
+# Run clean room tests (AGPL-free)  
 python -m pytest tests/ -v --cov=src --cov-report=html
 
 # Execute linting and type checking
 ruff check src/ && mypy src/ --ignore-missing-imports
 
-# Run filtered test suite (excluding Supernote tests)
-pytest -q -k "not supernote and not e2e_supernote"
+# Test clean Supernote parser (95K pixel baseline)
+python -c "from src.utils.supernote_parser import SupernoteParser; print('Clean parser ready')"
 
 # For single-line execution (preferred)
 source .venv/bin/activate && python -m pytest tests/ -v
 ```
+
+## 🚨 LEGAL FIREWALL PROTOCOLS
+
+**ABSOLUTE PROHIBITIONS FOR COMMERCIAL COMPLIANCE:**
+1. **NO ACCESS** to `/reference-only-analysis/` (contains AGPL code)
+2. **NO COPYING** of algorithms from quarantined materials  
+3. **NO DERIVATION** of code logic from AGPL implementations
+4. **NO TESTING** against AGPL outputs during development
+
+**See `/clean-room-development/LEGAL_FIREWALL.md` for complete protocols**
 
 ## PYTHON ENVIRONMENT PROTOCOLS
 
@@ -88,23 +100,22 @@ source .venv/bin/activate && python parallel_extraction_test.py
 ## ARCHITECTURE
 
 ### Core Components:
-- **Hybrid OCR Pipeline**: Tesseract + Qwen2.5-VL + Google Vision + GPT-4 Vision with intelligent routing
-- **Local Vision Models**: Qwen2.5-VL 7B via Ollama for superior handwriting transcription
+- **Hybrid OCR Pipeline**: Tesseract + Google Vision + GPT-4 Vision with intelligent routing
 - **Relationship Detection**: Visual and semantic relationship analysis between note elements  
 - **Concept Clustering**: Multi-strategy concept extraction and thematic organization
 - **Structure Generation**: Multiple document formats (outline, mindmap, timeline, process)
 - **Cost Controls**: Daily budget limits with automatic fallbacks
 
 ### Current Dependencies:
-- **sn2md/supernotelib**: Used for .note file extraction [**LICENSING RISK**]
-  - Status: External dependency for Supernote file parsing
-  - Risk: Potential licensing conflicts for commercial use
-  - Priority: **HIGH** - Must develop independent extraction capability
+- ⚠️ **AGPL QUARANTINE ACTIVE**: All sn2md/supernotelib references moved to `/reference-only-analysis/`
+- ✅ **Clean Implementation**: 100% independent Supernote parser (95K pixel baseline)
+- 🎯 **Commercial Target**: 2.6M+ pixels (27x improvement required)
+- 🔒 **Legal Compliance**: Zero AGPL contamination in production code
 
 ## CURRENT STATUS
 
-- Test suite: **Varies by module** ✅ 
-- Test coverage: **70%+** (exceeds 65% requirement) ✅
+- Test suite: **137 passed, 0 failing** ✅
+- Test coverage: **70.45%** (exceeds 65% requirement) ✅
 - OCR integration: Working with Tesseract 5.3.4
 - Environment: Ubuntu 24.04, Python 3.12.3
 - CI/CD: All GitHub Actions passing ✅

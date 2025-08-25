@@ -4,10 +4,10 @@
 
 ```bash
 # Activate Python environment
-source venv/bin/activate
+source .venv/bin/activate
 
 # Run the quick test
-python quick_supernote_test.py
+python scripts/quick_supernote_test.py
 ```
 
 **What this does:**
@@ -19,21 +19,28 @@ python quick_supernote_test.py
 ## Step 2: Sync Your Files (1 minute)
 
 ```bash
-# Download recent notes
-ghost-writer sync --output supernote_downloads/
+# Use the web interface for file sync and processing
+source .venv/bin/activate
+python web_viewer_demo_simple.py
 
-# OR download notes from specific date
-ghost-writer sync --since 2025-01-01 --output supernote_downloads/
+# Open browser to http://localhost:5000
+# Login with Supernote credentials and process notes
 ```
 
 ## Step 3: Process Your Notes (30 seconds)
 
+The web interface handles processing automatically with:
+- Qwen2.5-VL local vision model for handwriting transcription
+- Real-time results display
+- Multiple format exports
+
+Or use CLI:
 ```bash
 # Convert a single .note file
-ghost-writer process supernote_downloads/my_notes.note --format markdown
+python -m src.cli process my_notes.note --format markdown
 
-# OR process entire folder
-ghost-writer process supernote_downloads/ --format all
+# OR process image files
+python -m src.cli process notes_image.png --format all
 ```
 
 ## That's It! 
@@ -55,7 +62,8 @@ Your handwritten notes are now:
 - Try syncing from your Supernote device first
 
 **Python errors:**
-- Make sure you ran `source venv/bin/activate` first
+- Make sure you ran `source .venv/bin/activate` first
+- Install Ollama and pull Qwen2.5-VL model: `ollama pull qwen2.5vl:7b`
 - Check that you're in the ghost-writer directory
 
 ---
