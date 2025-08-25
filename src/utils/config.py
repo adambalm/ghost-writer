@@ -49,8 +49,13 @@ class Config:
                 "path": "data/database/ghost_writer.db"
             },
             "ocr": {
-                "default_provider": "tesseract",
+                "default_provider": "qwen",
                 "providers": {
+                    "qwen": {
+                        "model_name": "qwen2.5vl:7b",
+                        "timeout": 120,
+                        "confidence_threshold": 90
+                    },
                     "tesseract": {
                         "config": "--oem 3 --psm 6",
                         "confidence_threshold": 60
@@ -61,7 +66,8 @@ class Config:
                     "hybrid": {
                         "low_confidence_threshold": 75,
                         "cost_limit_per_day": 5.00,
-                        "prefer_local": True
+                        "prefer_local": True,
+                        "provider_priority": ["qwen", "tesseract", "google_vision", "gpt4_vision"]
                     }
                 }
             },

@@ -28,8 +28,9 @@
 ### **OCR Strategy Decision**
 - **Original Plan**: Basic Tesseract-only OCR
 - **Pivoted To**: Hybrid premium OCR (Tesseract + Google Vision + GPT-4 Vision)
-- **Rationale**: Market demands premium accuracy; existing tools are insufficient
-- **Implementation**: ✅ Architecture complete, untested with real APIs
+- **Final Architecture**: Unified OCR with Qwen2.5-VL primary (superior local handwriting recognition)
+- **Rationale**: Market demands premium accuracy; Qwen provides free superior results vs cloud APIs
+- **Implementation**: ✅ Unified architecture complete, Qwen2.5-VL via Ollama integrated
 
 ### **Cost Control Decision**
 - **Decision**: Daily budget limits with automatic fallbacks
@@ -54,7 +55,18 @@
 
 ---
 
-## Phase 4: Testing & Validation Strategy (Current)
+## Phase 4: OCR Architecture Unification (August 2025)
+
+### **Unified OCR Decision** (2025-08-25)
+- **Problem**: Dual OCR architectures created unnecessary complexity (CLI used Tesseract+Cloud, Web used Qwen2.5-VL)
+- **Decision**: Unify on Qwen2.5-VL as primary provider across all interfaces
+- **Rationale**: Qwen provides superior handwriting recognition, is free, local, and reduces technical complexity
+- **Implementation**: ✅ Complete - updated providers, factory, config, and all documentation
+- **Benefits**: Single codebase, better accuracy, zero cost, privacy-first
+
+---
+
+## Phase 5: Testing & Validation Strategy (Current)
 
 ### **API Integration Decision** (2025-08-08)
 - **Challenge**: How to test premium OCR providers without API credentials?
@@ -67,12 +79,12 @@
 - **Phase 3**: Hybrid deployment where users upgrade quality by adding API keys
 - **Phase 4**: Production with smart fallbacks (API failure → local processing)
 
-### **Benefits of This Approach**:
-1. **Immediate Value**: Users get functionality with just Tesseract (free, private)
-2. **Gradual Enhancement**: Add Google Vision for better accuracy ($0.0015/image)
-3. **Premium Option**: Add GPT-4 Vision for semantic understanding ($0.01/image)
-4. **Graceful Degradation**: System works even if APIs are unavailable
-5. **Privacy Control**: Users can stay fully local if desired
+### **Benefits of Unified Approach**:
+1. **Superior Accuracy**: Qwen2.5-VL provides better handwriting recognition than traditional OCR
+2. **Zero Cost**: Local processing eliminates API costs while providing premium results
+3. **Privacy First**: All processing local by default, no data sent to cloud
+4. **Simplified Architecture**: Single codebase reduces maintenance complexity
+5. **Graceful Fallbacks**: Tesseract fallback if Ollama unavailable, cloud APIs for premium use cases
 
 ### **Testing Philosophy**:
 - **Mock-First**: Validate business logic without external dependencies

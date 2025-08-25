@@ -61,7 +61,7 @@ ghost-writer/
 
 - **Supernote Cloud Integration**: Direct login and file retrieval
 - **Enhanced Decoder**: 55x improvement in image quality
-- **Hybrid OCR**: Tesseract + Google Vision + GPT-4 Vision
+- **Unified OCR Pipeline**: Qwen2.5-VL (primary) + Tesseract + Google Vision + GPT-4 Vision
 - **Document Processing**: Structure generation and concept clustering
 - **Privacy-First**: Local processing with optional cloud features
 

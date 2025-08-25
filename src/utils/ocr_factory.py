@@ -91,6 +91,7 @@ def create_ocr_result_without_extraction(text: str, provider: str, confidence: f
         text=text,
         confidence=confidence,
         provider=provider,
+        processing_time=0.0,  # No processing time for combined results
         cost=cost,
         bounding_boxes=[],  # Empty for combined results
         word_confidences=[]  # Empty for combined results

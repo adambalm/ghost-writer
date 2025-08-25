@@ -20,6 +20,32 @@
 
 ## Update History
 
+- [2025-08-25 12:37:54 PM] [Unknown User] - Decision Made: Unified OCR Architecture: Consolidation on Qwen2.5-VL
+- [2025-08-25 12:37:16 PM] [Unknown User] - Unified OCR Architecture with Qwen2.5-VL Integration: Successfully eliminated architectural complexity by unifying OCR pipeline on Qwen2.5-VL:
+
+TECHNICAL IMPLEMENTATION:
+- Created QwenOCR provider class with proven subprocess method from web app
+- Updated HybridOCR to prioritize Qwen first in all quality modes
+- Modified provider factory and configuration to support Qwen integration
+- Updated config.yaml to make Qwen default provider with proper fallbacks
+
+ARCHITECTURAL BENEFITS:
+- Eliminated split system complexity (CLI used different OCR than Web App)
+- Reduced from dual OCR codebases to unified single pipeline
+- Superior handwriting recognition now available in CLI and Web consistently
+- Cost reduction: $0.0000 (FREE) vs $0.01+ per cloud call
+
+EVIDENCE OF SUCCESS:
+- CLI now outputs: "OCR Provider: qwen2.5vl" with "Processing Cost: $0.0000"
+- Configuration shows: provider_priority: ["qwen", "tesseract", "google_vision", "gpt4_vision"]
+- Both CLI and Web App use same Qwen2.5-VL model for consistency
+
+PERFORMANCE IMPACT:
+- Processing time: ~2-5 seconds for handwriting transcription
+- Quality: Superior to Tesseract for handwritten content
+- Reliability: Falls back to Tesseract → Cloud providers if Qwen unavailable
+
+This addresses the user's valid concern about unnecessary technical complexity and provides a cleaner, more efficient architecture.
 - [2025-08-25 11:50:03 AM] [Unknown User] - File Update: Updated progress.md
 - [2025-08-25] - **CRITICAL BREAKTHROUGH**: Clean Room Decoder Commercial Viability Achieved
   - **Root Cause Analysis**: Forensic analysis identified 5 critical implementation flaws

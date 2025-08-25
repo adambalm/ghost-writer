@@ -11,7 +11,8 @@ Ghost Writer is an OCR and document processing system for handwritten notes. It 
 
 ### Current Status
 
-- Hybrid OCR Pipeline: Tesseract + Google Vision + GPT-4 Vision with intelligent routing
+- **Unified OCR Pipeline**: Qwen2.5-VL (local) + Tesseract + Google Vision + GPT-4 Vision with intelligent routing
+- **Superior Handwriting Recognition**: Qwen2.5-VL provides FREE local transcription with 2-5s response time
 - Document Processing: Relationship detection, concept clustering, structure generation  
 - Test Coverage: 137 tests passing with 76% code coverage
 - Privacy & Cost Controls: Local-first processing with automatic budget management

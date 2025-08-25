@@ -42,12 +42,15 @@ Install with:
 pip install -r requirements.txt
 ```
 
-### Local LLM Model
+### Local Vision Model (Primary OCR)
 ```bash
-# Download Llama 3.2 (3B parameters - good balance of speed/quality)
+# Download Qwen2.5-VL (7B parameters - superior handwriting recognition)
+ollama pull qwen2.5vl:7b
+
+# Optional: Llama 3.2 for text generation tasks
 ollama pull llama3.2:3b
 
-# Verify model is available
+# Verify models are available
 ollama list
 ```
 
@@ -246,8 +249,8 @@ source venv/bin/activate
 # 3. Python packages
 pip install -r requirements.txt
 
-# 4. Local LLM model
-ollama pull llama3.2:3b
+# 4. Local vision model (primary OCR)
+ollama pull qwen2.5vl:7b
 
 # 5. Project structure
 mkdir -p src/utils data/{notes,database,faiss_index,style_corpus} tests/fixtures config docs

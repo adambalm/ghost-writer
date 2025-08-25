@@ -13,7 +13,7 @@ Ghost Writer is a handwritten note processing system that addresses note transcr
 1. **Privacy-Conscious Processing** – Transcription of meeting notes, research, and documents using hybrid OCR with local-first processing
 2. **Idea Organization** – Semantic relationship detection and structure generation to help organize thoughts into coherent documents
 
-The system leverages hybrid OCR including local vision models (Qwen2.5-VL via Ollama), cloud APIs (Google Cloud Vision, GPT-4 Vision) with cost controls and local fallbacks, providing transcription and idea organization capabilities.
+The system leverages unified OCR pipeline with Qwen2.5-VL (primary), Tesseract, Google Cloud Vision, and GPT-4 Vision with cost controls and local fallbacks, providing transcription and idea organization capabilities.
 
 ## TARGET USE CASES
 
@@ -43,18 +43,18 @@ The system leverages hybrid OCR including local vision models (Qwen2.5-VL via Ol
 
 ## CORE ARCHITECTURE
 
-### Hybrid OCR Pipeline:
+### Unified OCR Pipeline:
 ```
-Local Processing (Tesseract) ────┐
-Local Vision LLM (Qwen2.5-VL) ───┤
-                                 ├─── Smart Router ───> Best Result
-Premium APIs (Google Vision) ────┤
-Premium APIs (GPT-4 Vision) ─────┘
+Primary: Qwen2.5-VL (Local Vision LLM) ─┐
+Fallback: Tesseract (Local Traditional) ─┤
+                                          ├─── Smart Router ───> Best Result
+Premium: Google Vision (Cloud API) ──────┤
+Premium: GPT-4 Vision (Cloud API) ───────┘
 ```
 
-**OCR Providers**:
-- **Tesseract**: Local, free, privacy-safe (baseline traditional OCR)
-- **Qwen2.5-VL**: Local vision language model via Ollama (superior handwriting recognition, 2-4 second response)
+**OCR Providers** (Priority Order):
+- **Qwen2.5-VL**: Primary provider, local vision language model via Ollama (superior handwriting recognition, 2-4 second response)
+- **Tesseract**: Local fallback, free, privacy-safe (baseline traditional OCR)
 - **Google Cloud Vision**: Premium accuracy, $0.0015/image
 - **GPT-4 Vision**: Semantic understanding, $0.01/image  
 - **Hybrid Router**: Cost-aware quality selection with automatic fallbacks
@@ -143,10 +143,11 @@ OCR Text ─> Relationship Detection ─> Concept Clustering ─> Structure Gene
 
 ## TECHNICAL IMPLEMENTATION
 
-### Premium OCR Stack:
-- **Google Cloud Vision API**: Document text detection with word-level confidence
-- **OpenAI GPT-4 Vision**: Semantic transcription with context understanding  
+### Unified OCR Stack:
+- **Qwen2.5-VL via Ollama**: Primary local vision model with superior handwriting recognition
 - **Tesseract**: Local fallback with image preprocessing pipeline
+- **Google Cloud Vision API**: Premium cloud provider for high-accuracy fallback
+- **OpenAI GPT-4 Vision**: Premium semantic transcription with context understanding  
 - **Hybrid Router**: Cost-aware provider selection with quality thresholds
 
 ### Idea Organization Stack:

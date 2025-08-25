@@ -55,3 +55,18 @@
 - **Decision:** Implement comprehensive pipeline with staging and production stages
 - **Alternatives Considered:** Simple CI only, manual deployment, basic automation
 - **Consequences:** Higher reliability, automated quality checks, deployment complexity
+## Unified OCR Architecture: Consolidation on Qwen2.5-VL
+- **Date:** 2025-08-25 12:37:54 PM
+- **Author:** Unknown User
+- **Context:** User questioned why the system maintained two separate OCR architectures: CLI used Tesseract+Cloud providers while Web App used Qwen2.5-VL. This created unnecessary technical complexity, inconsistent results, and missed opportunities for cost savings and superior performance.
+- **Decision:** Unified the entire OCR pipeline on Qwen2.5-VL as the primary provider across both CLI and Web interfaces, with Tesseract and cloud providers as fallbacks. Implemented QwenOCR provider class and updated all configuration to prioritize Qwen first.
+- **Alternatives Considered:** 
+  - Keep split architecture (rejected: adds complexity)
+  - Use Tesseract everywhere (rejected: inferior handwriting recognition)
+  - Use cloud-only (rejected: expensive and privacy concerns)
+- **Consequences:** 
+  - Reduced architectural complexity from dual systems to unified pipeline
+  - Superior handwriting recognition now available everywhere
+  - Cost savings: FREE local processing instead of $0.01+ per cloud call
+  - Consistent results across CLI and Web interfaces
+  - Requires Ollama + 6GB model but eliminates split codebase maintenance

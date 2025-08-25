@@ -88,8 +88,8 @@ source .venv/bin/activate && python parallel_extraction_test.py
 ## ARCHITECTURE
 
 ### Core Components:
-- **Hybrid OCR Pipeline**: Tesseract + Qwen2.5-VL + Google Vision + GPT-4 Vision with intelligent routing
-- **Local Vision Models**: Qwen2.5-VL 7B via Ollama for superior handwriting transcription
+- **Unified OCR Pipeline**: Qwen2.5-VL (primary) + Tesseract + Google Vision + GPT-4 Vision with intelligent routing
+- **Local Vision Models**: Qwen2.5-VL 7B via Ollama for superior handwriting transcription (now unified across CLI and Web)
 - **Relationship Detection**: Visual and semantic relationship analysis between note elements  
 - **Concept Clustering**: Multi-strategy concept extraction and thematic organization
 - **Structure Generation**: Multiple document formats (outline, mindmap, timeline, process)
