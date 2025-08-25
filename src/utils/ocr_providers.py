@@ -58,7 +58,7 @@ class OCRProvider(ABC):
     
     def preprocess_image(self, image_path: Union[str, Path]) -> Image.Image:
         """Common image preprocessing pipeline"""
-        image = Image.open(image_path)
+        image: Image.Image = Image.open(image_path)
         
         # Convert to RGB if needed
         if image.mode != 'RGB':
