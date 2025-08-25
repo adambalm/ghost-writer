@@ -48,7 +48,9 @@ class TestOCRBusinessLogic:
         mock_db.track_ocr_usage.return_value = True
         
         with patch('src.utils.ocr_providers.DatabaseManager', return_value=mock_db), \
-             patch('src.utils.ocr_providers.config') as mock_config:
+             patch('src.utils.ocr_providers.config') as mock_config, \
+             patch('src.utils.ocr_providers.TesseractOCR') as mock_tesseract, \
+             patch('src.utils.ocr_providers.GoogleVisionOCR') as mock_google:
             
             mock_config.get.return_value = {
                 'providers': {
@@ -56,6 +58,10 @@ class TestOCRBusinessLogic:
                     'google_vision': {'confidence_threshold': 85}
                 }
             }
+            
+            # Mock provider instances
+            mock_tesseract.return_value.name = "tesseract"
+            mock_google.return_value.name = "google_vision"
             
             # Create hybrid OCR with mocked providers
             hybrid = HybridOCR(config)
@@ -421,7 +427,10 @@ class TestOCRProviderFactory:
             }
         }
         
-        with patch('src.utils.ocr_providers.config') as mock_config_obj:
+        with patch('src.utils.ocr_providers.config') as mock_config_obj, \
+             patch('google.cloud.vision.ImageAnnotatorClient'), \
+             patch('openai.OpenAI'):
+            
             mock_config_obj.get.return_value = mock_config
             
             # Test Tesseract creation

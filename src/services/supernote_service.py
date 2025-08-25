@@ -7,7 +7,7 @@ that can be used by both CLI and web interfaces.
 
 import logging
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 from datetime import datetime
 
 from src.utils.supernote_parser_enhanced import convert_note_to_images
@@ -71,7 +71,7 @@ class SupernoteService:
             logger.error(f"Failed to process note file {note_path}: {e}")
             return {"success": False, "error": str(e)}
     
-    def authenticate_supernote(self, phone: str = None, password: str = None) -> bool:
+    def authenticate_supernote(self, phone: Optional[str] = None, password: Optional[str] = None) -> bool:
         """
         Authenticate with Supernote Cloud service
         
@@ -84,7 +84,7 @@ class SupernoteService:
         """
         try:
             from src.utils.config import config
-            client = create_supernote_client(config, email=phone, password=password)
+            client = create_supernote_client(config._config, email=phone, password=password)
             return client is not None
         except Exception as e:
             logger.error(f"Supernote authentication failed: {e}")
@@ -99,7 +99,7 @@ class SupernoteService:
         """
         try:
             from src.utils.config import config
-            client = create_supernote_client(config)
+            client = create_supernote_client(config._config)
             if not client:
                 logger.error("Not authenticated with Supernote Cloud")
                 return []
@@ -109,12 +109,12 @@ class SupernoteService:
             logger.error(f"Failed to list cloud files: {e}")
             return []
     
-    def download_cloud_file(self, file_id: str, output_path: Path) -> bool:
+    def download_cloud_file(self, supernote_file: SupernoteFile, output_path: Path) -> bool:
         """
         Download a file from Supernote Cloud
         
         Args:
-            file_id: ID of file to download
+            supernote_file: SupernoteFile object to download
             output_path: Where to save the file
             
         Returns:
@@ -122,14 +122,15 @@ class SupernoteService:
         """
         try:
             from src.utils.config import config
-            client = create_supernote_client(config)
+            client = create_supernote_client(config._config)
             if not client:
                 logger.error("Not authenticated with Supernote Cloud")
                 return False
             
-            return client.download_file(file_id, output_path)
+            return client.download_file(supernote_file, output_path)
         except Exception as e:
-            logger.error(f"Failed to download file {file_id}: {e}")
+            file_name = getattr(supernote_file, 'name', str(supernote_file))
+            logger.error(f"Failed to download file {file_name}: {e}")
             return False
 
 

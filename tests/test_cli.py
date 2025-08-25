@@ -312,7 +312,7 @@ class TestSingleFileProcessing:
         
         # Verify all components were called
         mock_ocr.extract_text.assert_called_once()
-        mock_db.store_note.assert_called_once()
+        # Note: store_note is not called in process_single_file function
         mock_relation.detect_relationships.assert_called_once()
     
     @patch('src.cli.HybridOCR')

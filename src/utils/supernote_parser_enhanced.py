@@ -11,7 +11,7 @@ The format may change with Supernote firmware updates.
 import logging
 import struct
 from pathlib import Path
-from typing import List, Tuple, Optional, Dict, Any
+from typing import List, Tuple, Optional, Dict, Any, Set
 from dataclasses import dataclass
 from enum import Enum, auto
 
@@ -63,7 +63,7 @@ class SupernotePage:
     height: int
     strokes: List[SupernoteStroke]
     background_type: int = 0
-    metadata: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 
 class SupernoteParser:
@@ -247,9 +247,10 @@ class SupernoteParser:
                     if bitmap_data:
                         # Store decoded bitmap for image rendering
                         decoded_bitmap = self._decode_ratta_rle(bitmap_data, 1404, 1872)
-                        page.metadata['decoded_bitmap'] = decoded_bitmap
-                        page.metadata['has_content'] = np.sum(decoded_bitmap < 255) > 0
-                        page.metadata['actual_bitmap_size'] = len(bitmap_data)
+                        if page.metadata is not None:
+                            page.metadata['decoded_bitmap'] = decoded_bitmap
+                            page.metadata['has_content'] = np.sum(decoded_bitmap < 255) > 0
+                            page.metadata['actual_bitmap_size'] = len(bitmap_data)
                     
                     pages.append(page)
                     current_page += 1
@@ -387,13 +388,13 @@ class SupernoteParser:
             return self._extract_layer_info_original(data)
         
         # Supplement with dynamic parsing for additional layers
-        dynamic_layers = self._find_additional_layers(data, known_addresses.keys())
+        dynamic_layers = self._find_additional_layers(data, set(known_addresses.keys()))
         layers.extend(dynamic_layers)
         
         logger.info(f"Enhanced extraction: found {len(layers)} total layers")
         return layers
     
-    def _find_additional_layers(self, data: bytes, known_addresses: set) -> List[Dict[str, Any]]:
+    def _find_additional_layers(self, data: bytes, known_addresses: Set[int]) -> List[Dict[str, Any]]:
         """Find additional layers beyond the known addresses"""
         
         additional_layers = []
@@ -458,7 +459,7 @@ class SupernoteParser:
     def _extract_layer_info_original(self, data: bytes) -> List[Dict[str, Any]]:
         """Original layer extraction method as fallback"""
         
-        layers = []
+        layers: List[Dict[str, Any]] = []
         pos = 0
         
         logger.debug(f"Scanning {len(data)} bytes for layer metadata...")
@@ -594,8 +595,11 @@ class SupernoteParser:
         # Filter to only return layers that exist in the data
         valid_layers = []
         for layer in layers:
-            if layer['pos'] + layer['bitmap_size'] <= len(data):
-                valid_layers.append(layer)
+            pos_val = layer.get('pos', 0)
+            size_val = layer.get('bitmap_size', 0)
+            if isinstance(pos_val, int) and isinstance(size_val, int):
+                if pos_val + size_val <= len(data):
+                    valid_layers.append(layer)
         
         return valid_layers
     
@@ -1120,7 +1124,7 @@ class SupernoteParser:
             
             if bitmap_data:
                 # Decode using RLE decoder
-                decoded_bitmap = self._decode_rle_bitmap_v3(bitmap_data, layer_info)
+                decoded_bitmap = self._decode_ratta_rle(bitmap_data, 1404, 1872)
                 
                 if decoded_bitmap is not None:
                     # Convert to PIL Image - use RGBA for transparency support
@@ -1391,7 +1395,7 @@ class SupernoteParser:
             return []
         
         # Simple greedy merging
-        merged = []
+        merged: List[Tuple[int, int, int, int]] = []
         
         for box in sorted(boxes):
             x1, y1, x2, y2 = box

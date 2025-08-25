@@ -11,7 +11,7 @@ The format may change with Supernote firmware updates.
 import logging
 import struct
 from pathlib import Path
-from typing import List, Tuple, Optional, Dict, Any
+from typing import List, Tuple, Optional, Dict, Any, Union
 from dataclasses import dataclass
 from enum import Enum, auto
 
@@ -63,7 +63,7 @@ class SupernotePage:
     height: int
     strokes: List[SupernoteStroke]
     background_type: int = 0
-    metadata: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 
 class SupernoteParser:
@@ -247,9 +247,10 @@ class SupernoteParser:
                     if bitmap_data:
                         # Store decoded bitmap for image rendering
                         decoded_bitmap = self._decode_ratta_rle(bitmap_data, 1404, 1872)
-                        page.metadata['decoded_bitmap'] = decoded_bitmap
-                        page.metadata['has_content'] = np.sum(decoded_bitmap < 255) > 0
-                        page.metadata['actual_bitmap_size'] = len(bitmap_data)
+                        if page.metadata is not None:
+                            page.metadata['decoded_bitmap'] = decoded_bitmap
+                            page.metadata['has_content'] = np.sum(decoded_bitmap < 255) > 0
+                            page.metadata['actual_bitmap_size'] = len(bitmap_data)
                     
                     pages.append(page)
                     current_page += 1
@@ -345,14 +346,14 @@ class SupernoteParser:
         logger.info("Using forensically verified layer addresses")
         
         # Known layer addresses from forensic analysis [verified]
-        forensic_layers = [
+        forensic_layers: List[Dict[str, Any]] = [
             {"name": "Page1_MAINLAYER", "address": 768},
             {"name": "Page1_BGLAYER", "address": 440}, 
             {"name": "Page2_MAINLAYER", "address": 847208}
         ]
         
         for layer in forensic_layers:
-            address = layer['address']
+            address: int = layer['address']  # Type hint for MyPy
             
             # Read 4-byte size field at the address
             if address + 4 > len(data):
@@ -377,8 +378,8 @@ class SupernoteParser:
                 "address": address,
                 "data_start": data_start,
                 "bitmap_size": actual_size,
-                "layer_type": "MAINLAYER" if "MAIN" in layer['name'] else "BGLAYER",
-                "layer_name": "MAINLAYER" if "MAIN" in layer['name'] else "BGLAYER",
+                "layer_type": "MAINLAYER" if "MAIN" in str(layer['name']) else "BGLAYER",
+                "layer_name": "MAINLAYER" if "MAIN" in str(layer['name']) else "BGLAYER",
                 "source": "forensic_verified"
             }
             
@@ -440,7 +441,7 @@ class SupernoteParser:
         logger.warning("Using fallback forensically verified addresses")
         
         # Use same forensically verified positions as primary method
-        forensic_layers = [
+        forensic_layers: List[Dict[str, Any]] = [
             {"name": "Page1_MAINLAYER", "address": 768},
             {"name": "Page1_BGLAYER", "address": 440}, 
             {"name": "Page2_MAINLAYER", "address": 847208}
@@ -448,7 +449,7 @@ class SupernoteParser:
         
         valid_layers = []
         for layer in forensic_layers:
-            address = layer['address']
+            address: int = layer['address']  # Type hint for MyPy
             
             # Read 4-byte size field at the address
             if address + 4 <= len(data):
@@ -461,8 +462,8 @@ class SupernoteParser:
                         "address": address,
                         "data_start": data_start,
                         "bitmap_size": actual_size,
-                        "layer_type": "MAINLAYER" if "MAIN" in layer['name'] else "BGLAYER",
-                        "layer_name": "MAINLAYER" if "MAIN" in layer['name'] else "BGLAYER",
+                        "layer_type": "MAINLAYER" if "MAIN" in str(layer['name']) else "BGLAYER",
+                        "layer_name": "MAINLAYER" if "MAIN" in str(layer['name']) else "BGLAYER",
                         "source": "forensic_fallback"
                     }
                     valid_layers.append(layer_info)
@@ -575,8 +576,8 @@ class SupernoteParser:
         uncompressed = bytearray()
         
         bin_iter = iter(compressed_data)
-        holder = ()
-        waiting = []
+        holder: Union[Tuple[()], Tuple[int, int]] = ()  # Empty tuple initially
+        waiting: List[Tuple[int, int]] = []
         
         try:
             while True:
@@ -587,7 +588,7 @@ class SupernoteParser:
                 # Process held data from previous iteration (CRITICAL)
                 if len(holder) > 0:
                     (prev_colorcode, prev_length) = holder
-                    holder = ()
+                    holder = ()  # Reset to empty tuple
                     if colorcode == prev_colorcode:
                         # CRITICAL: Combine lengths using reference formula [verified]
                         length = 1 + length + (((prev_length & 0x7f) + 1) << 7)
@@ -607,7 +608,7 @@ class SupernoteParser:
                         data_pushed = True
                     elif length & 0x80 != 0:
                         # High bit set: hold for next iteration (CRITICAL)
-                        holder = (colorcode, length)
+                        holder = (colorcode, length)  # Set as tuple
                         # Will be processed in next loop iteration
                     else:
                         # Normal length: immediate processing
@@ -1011,7 +1012,7 @@ class SupernoteParser:
             
             if bitmap_data:
                 # Decode using RLE decoder
-                decoded_bitmap = self._decode_rle_bitmap_v3(bitmap_data, layer_info)
+                decoded_bitmap = self._decode_ratta_rle(bitmap_data, 1404, 1872)
                 
                 if decoded_bitmap is not None:
                     # Convert to PIL Image - use RGBA for transparency support
@@ -1282,7 +1283,7 @@ class SupernoteParser:
             return []
         
         # Simple greedy merging
-        merged = []
+        merged: List[Tuple[int, int, int, int]] = []
         
         for box in sorted(boxes):
             x1, y1, x2, y2 = box

@@ -64,7 +64,7 @@ class SupernoteCloudAPI:
         self.credentials = credentials
         self.session = self._create_session()
         self.authenticated = False
-        self.last_error = None
+        self.last_error: Optional[Dict[str, Any]] = None
         
         logger.info("SupernoteCloudAPI initialized")
     
@@ -200,7 +200,7 @@ class SupernoteCloudAPI:
                 'device_id': self.credentials.device_id or self._generate_device_id()
             }
             
-            response = self.session.post(self.AUTH_URL, json=auth_data)
+            response = self.session.post(f"{self.BASE_URL}{self.ENDPOINTS['login']}", json=auth_data)
             
             if response.status_code == 200:
                 auth_result = response.json()

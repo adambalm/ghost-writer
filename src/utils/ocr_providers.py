@@ -463,7 +463,7 @@ class HybridOCR(OCRProvider):
     
     def __init__(self, provider_config: Dict[str, Any]):
         super().__init__(provider_config)
-        self.providers = {}
+        self.providers: Dict[str, OCRProvider] = {}
         self._initialize_providers()
     
     def _initialize_providers(self):

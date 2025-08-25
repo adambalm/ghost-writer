@@ -15,6 +15,15 @@ SUPERNOTE_PASSWORD = os.getenv('SUPERNOTE_PASSWORD', 'z8UrxJWlqWH0Ep')
 
 BASE_URL = "http://localhost:5000"
 
+# Mark all tests in this module as web tests - skip in CI
+pytestmark = [
+    pytest.mark.web,
+    pytest.mark.skipif(
+        os.getenv('CI') == 'true' or os.getenv('GITHUB_ACTIONS') == 'true',
+        reason="Web tests disabled in CI environment"
+    )
+]
+
 class TestWebInterface:
     """Test suite for Ghost Writer web interface"""
     

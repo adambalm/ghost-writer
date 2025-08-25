@@ -227,15 +227,16 @@ class Config:
         """Save current configuration to YAML file"""
         try:
             if output_path is None:
-                output_path = self.config_path
+                path_to_use = self.config_path
+            else:
+                path_to_use = Path(output_path)
             
-            output_path = Path(output_path)
-            output_path.parent.mkdir(parents=True, exist_ok=True)
+            path_to_use.parent.mkdir(parents=True, exist_ok=True)
             
-            with open(output_path, 'w') as f:
+            with open(path_to_use, 'w') as f:
                 yaml.dump(self._config, f, default_flow_style=False, indent=2)
             
-            logger.info(f"Configuration saved to {output_path}")
+            logger.info(f"Configuration saved to {path_to_use}")
             return True
             
         except Exception as e:

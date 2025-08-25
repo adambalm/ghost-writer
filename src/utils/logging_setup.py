@@ -6,7 +6,7 @@ import logging
 import logging.handlers
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, Any
 import json
 from datetime import datetime
 
@@ -75,7 +75,7 @@ class GhostWriterLogger:
         else:
             return int(size_str)
 
-    def log_function_call(self, func_name: str, args: dict = None, kwargs: dict = None):
+    def log_function_call(self, func_name: str, args: Optional[Dict[Any, Any]] = None, kwargs: Optional[Dict[Any, Any]] = None):
         """Log function calls with parameters for debugging"""
         if self.logger.isEnabledFor(logging.DEBUG):
             params = {}
@@ -85,17 +85,17 @@ class GhostWriterLogger:
                 params['kwargs'] = kwargs
             self.logger.debug(f"CALL {func_name} - {json.dumps(params, default=str)}")
 
-    def log_function_result(self, func_name: str, result: any = None, duration: float = None):
+    def log_function_result(self, func_name: str, result: Any = None, duration: Optional[float] = None):
         """Log function results and timing"""
         if self.logger.isEnabledFor(logging.DEBUG):
-            result_info = {"result_type": type(result).__name__}
+            result_info: Dict[str, Any] = {"result_type": type(result).__name__}
             if duration:
                 result_info["duration_ms"] = round(duration * 1000, 2)
             if hasattr(result, '__len__') and not isinstance(result, str):
                 result_info["result_length"] = len(result)
             self.logger.debug(f"RESULT {func_name} - {json.dumps(result_info, default=str)}")
 
-    def log_performance(self, operation: str, duration: float, items_processed: int = None):
+    def log_performance(self, operation: str, duration: float, items_processed: Optional[int] = None):
         """Log performance metrics"""
         perf_info = {
             "operation": operation,
@@ -117,7 +117,7 @@ class GhostWriterLogger:
         }
         self.logger.info(f"COST - {json.dumps(cost_info)}")
 
-    def log_error_with_context(self, error: Exception, context: dict = None):
+    def log_error_with_context(self, error: Exception, context: Optional[Dict[Any, Any]] = None):
         """Log errors with additional context"""
         error_info = {
             "error_type": type(error).__name__,

@@ -43,9 +43,13 @@ jobs:
           safety check --json --output safety-report.json || true
           
       - name: Test Suite with Coverage
+        env:
+          # Prevent expensive API calls in CI
+          OPENAI_API_KEY: ""
+          GOOGLE_APPLICATION_CREDENTIALS: ""
         run: |
           mkdir -p .handoff
-          pytest tests/ -v \
+          pytest tests/ -v -m "not web" \
             --cov=src \
             --cov-report=xml:.handoff/coverage.xml \
             --cov-report=html:reports/coverage \

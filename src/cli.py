@@ -65,13 +65,13 @@ def process(ctx, input_path: str, output: Optional[str], format: str,
     console.print("🎯 [bold blue]Ghost Writer v2.0[/bold blue] - Processing Notes")
     console.print(f"📁 Input: {input_path}")
     
-    input_path = Path(input_path)
+    input_path_obj = Path(input_path)
     
     # Determine output directory
     if output:
         output_dir = Path(output)
     else:
-        output_dir = input_path.parent / "ghost_writer_output"
+        output_dir = input_path_obj.parent / "ghost_writer_output"
     
     output_dir.mkdir(exist_ok=True)
     console.print(f"📤 Output: {output_dir}")
@@ -80,14 +80,14 @@ def process(ctx, input_path: str, output: Optional[str], format: str,
     files_to_process = []
     supported_extensions = {".png", ".jpg", ".jpeg", ".note", ".pdf"}
     
-    if input_path.is_file():
+    if input_path_obj.is_file():
         # Check if single file has supported extension
-        if input_path.suffix.lower() in supported_extensions:
-            files_to_process = [input_path]
+        if input_path_obj.suffix.lower() in supported_extensions:
+            files_to_process = [input_path_obj]
     else:
         # Find supported file types in directory
         for ext in supported_extensions:
-            files_to_process.extend(input_path.glob(f"**/*{ext}"))
+            files_to_process.extend(input_path_obj.glob(f"**/*{ext}"))
     
     if not files_to_process:
         console.print("❌ [red]No supported files found![/red]")
@@ -239,15 +239,13 @@ def process_single_file(
         logger.warning(f"No text extracted from {file_path}")
         return None
     
-    # Step 2: Store in database
-    db_manager.store_note(
-        source_file=str(file_path),
-        raw_text=ocr_result.text,
-        clean_text=ocr_result.text,
-        ocr_provider=ocr_result.provider,
-        ocr_confidence=ocr_result.confidence,
-        processing_cost=ocr_result.cost
-    )
+    # Step 2: Track OCR usage in database
+    if ocr_result.cost and ocr_result.cost > 0:
+        db_manager.track_ocr_usage(
+            provider=ocr_result.provider,
+            cost=ocr_result.cost,
+            images_processed=1
+        )
     
     # Step 3: Create note elements for further processing
     elements = create_note_elements_from_ocr(ocr_result)
@@ -478,7 +476,8 @@ def watch(ctx, directory: str, output: Optional[str], interval: int, format: str
             from .utils.structure_generator import StructureGenerator
             from .utils.database import DatabaseManager
             
-            ocr_provider = HybridOCR()
+            ocr_config = config.get("ocr", {})
+            ocr_provider = HybridOCR(provider_config=ocr_config)
             detector = RelationshipDetector()
             extractor = ConceptExtractor()
             clusterer = ConceptClusterer()
@@ -569,7 +568,7 @@ def sync(ctx, since: Optional[str], output: Optional[str]):
     
     # Create API client
     try:
-        client = create_supernote_client(config)
+        client = create_supernote_client(config._config)
         if not client:
             console.print("❌ [red]Supernote Cloud not configured[/red]")
             console.print("💡 Let's set up your Supernote credentials")
@@ -579,7 +578,7 @@ def sync(ctx, since: Optional[str], output: Optional[str]):
             password = click.prompt("Enter your Supernote password", hide_input=True, type=str)
             
             # Try again with credentials (pass them directly, not via config)
-            client = create_supernote_client(config, email=email, password=password)
+            client = create_supernote_client(config._config, email=email, password=password)
             if not client:
                 console.print("❌ [red]Authentication failed. Please check your credentials[/red]")
                 return
