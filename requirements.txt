@@ -14,6 +14,10 @@ watchdog>=3.0.0
 rich>=13.0.0
 reportlab>=4.0.0
 
+# Web framework and automation
+flask>=2.3.0
+playwright>=1.40.0
+
 # Testing and debugging
 pytest>=7.0.0
 pytest-cov>=4.0.0

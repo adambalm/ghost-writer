@@ -1,0 +1,7 @@
+{
+  "rollback_initiated_at": "2025-08-24T23:30:31.769589",
+  "reason": "Quality gates failure",
+  "rollback_strategy": "automatic",
+  "status": "completed",
+  "completed_at": "2025-08-24T23:30:31.769655"
+}

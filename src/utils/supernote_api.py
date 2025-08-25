@@ -9,7 +9,6 @@ Authentication and API endpoints tested with Supernote A6X2 "Nomad" devices.
 
 import logging
 import hashlib
-import os
 from pathlib import Path
 from typing import List, Dict, Optional, Any
 from datetime import datetime, timezone

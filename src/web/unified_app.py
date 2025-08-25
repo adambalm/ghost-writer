@@ -6,22 +6,18 @@ Replaces all the duplicate web viewers with a single, properly architected solut
 
 import os
 import sys
-import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
-from flask import Flask, render_template, request, jsonify, send_file
-from dotenv import load_dotenv
-
-# Add project paths
+# Add project paths before other imports
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "src"))
 
-from services.supernote_service import supernote_service
-from utils.config import config
+from flask import Flask, render_template, request, jsonify, send_file  # noqa: E402
+from dotenv import load_dotenv  # noqa: E402
+from services.supernote_service import supernote_service  # noqa: E402
 
 # Load environment variables
 load_dotenv()

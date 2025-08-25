@@ -6,9 +6,8 @@ that can be used by both CLI and web interfaces.
 """
 
 import logging
-import os
 from pathlib import Path
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict
 from datetime import datetime
 
 from src.utils.supernote_parser_enhanced import convert_note_to_images

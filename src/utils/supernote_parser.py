@@ -636,9 +636,9 @@ class SupernoteParser:
                 # Calculate final length to not exceed canvas
                 gap = expected_pixels - len(uncompressed)
                 for i in reversed(range(8)):
-                    l = ((length & 0x7f) + 1) << i
-                    if l <= gap:
-                        final_length = l
+                    length_val = ((length & 0x7f) + 1) << i
+                    if length_val <= gap:
+                        final_length = length_val
                         break
                 else:
                     final_length = gap  # Use remaining space
@@ -750,7 +750,7 @@ class SupernoteParser:
                 
                 pos += 4
                 
-            except:
+            except (IndexError, ValueError):
                 pos += 1
         
         return output
@@ -780,7 +780,7 @@ class SupernoteParser:
                 
                 pos += 2
                 
-            except:
+            except (IndexError, ValueError):
                 pos += 1
         
         return output
@@ -836,7 +836,7 @@ class SupernoteParser:
                 
                 pos += chunk_size
                 
-            except:
+            except (IndexError, ValueError):
                 pos += 1
         
         return output
