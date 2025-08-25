@@ -11,8 +11,9 @@ import sys
 from getpass import getpass
 from pathlib import Path
 
-# Add the src directory to Python path
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+# Add the src directory to Python path using absolute path
+project_root = Path("/home/ed/ghost-writer")
+sys.path.insert(0, str(project_root / "src"))
 
 def test_supernote_connection():
     """Test Supernote Cloud connection with minimal setup"""

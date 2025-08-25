@@ -9,9 +9,6 @@ Authentication and API endpoints tested with Supernote A6X2 "Nomad" devices.
 
 import logging
 import hashlib
-import json
-import random
-import time
 from pathlib import Path
 from typing import List, Dict, Optional, Any
 from datetime import datetime, timezone
@@ -58,6 +55,7 @@ class SupernoteCloudAPI:
         "login": "/official/user/account/login/new", 
         "file_list": "/file/list/query",
         "download_url": "/file/download/url",
+        "file_url": "/file/url",  # Alternative endpoint found in research
         "upload_apply": "/file/upload/apply",
         "upload_finish": "/file/upload/finish"
     }
@@ -66,6 +64,7 @@ class SupernoteCloudAPI:
         self.credentials = credentials
         self.session = self._create_session()
         self.authenticated = False
+        self.last_error = None
         
         logger.info("SupernoteCloudAPI initialized")
     
@@ -102,12 +101,18 @@ class SupernoteCloudAPI:
             return False
         
         try:
+            # Determine if account is phone number or email
+            is_phone = self.credentials.email.isdigit()
+            
             # Step 1: Get random code with required parameters
+            # For US phone numbers, countryCode should be "1"
+            # For other countries, adjust accordingly
             random_params = {
-                "countryCode": "1",
+                "countryCode": "1" if is_phone else "",
                 "account": self.credentials.email  # Can be phone number or email
             }
             
+            logger.debug(f"Getting random code for account: {self.credentials.email}")
             random_response = self.session.post(
                 f"{self.BASE_URL}{self.ENDPOINTS['random_code']}",
                 json=random_params
@@ -115,11 +120,12 @@ class SupernoteCloudAPI:
             
             if not random_response.ok:
                 logger.error(f"Failed to get random code: {random_response.status_code}")
+                logger.debug(f"Response: {random_response.text}")
                 return False
             
             random_data = random_response.json()
             if not random_data.get("success"):
-                logger.error("Random code request unsuccessful")
+                logger.error(f"Random code request unsuccessful: {random_data}")
                 return False
             
             # Response format: randomCode and timestamp directly in response
@@ -151,12 +157,17 @@ class SupernoteCloudAPI:
             
             if not login_response.ok:
                 logger.error(f"Login request failed: {login_response.status_code}")
+                logger.debug(f"Login response: {login_response.text}")
                 return False
             
             login_result = login_response.json()
             
             if not login_result.get("success"):
-                logger.error(f"Login unsuccessful: {login_result.get('errorMsg', 'Unknown error')}")
+                error_msg = login_result.get('errorMsg', 'Unknown error')
+                error_code = login_result.get('errorCode', 'No code')
+                logger.error(f"Login unsuccessful: {error_msg} (Code: {error_code})")
+                # Store the error for retrieval
+                self.last_error = {'message': error_msg, 'code': error_code, 'full_response': login_result}
                 return False
             
             # Store access token (token is directly in response)
@@ -265,7 +276,10 @@ class SupernoteCloudAPI:
             files_data = result.get("userFileVOList", [])
             
             # Filter out folders, only return actual files
-            actual_files = [f for f in files_data if f.get('isFolder') != 'Y']
+            actual_files_data = [f for f in files_data if f.get('isFolder') != 'Y']
+            
+            # Parse the file data from current directory
+            parsed_files = [self._parse_file_info(file_data) for file_data in actual_files_data]
             
             # If we're looking at root and find the Note folder, also get files from there
             if directory_id == "0":
@@ -273,9 +287,9 @@ class SupernoteCloudAPI:
                 if note_folder:
                     logger.info("Found Note folder, fetching files from it...")
                     note_files = self.list_files(note_folder.get('id'))
-                    actual_files.extend(note_files)
+                    parsed_files.extend(note_files)
             
-            return [self._parse_file_info(file_data) for file_data in actual_files]
+            return parsed_files
                 
         except Exception as e:
             logger.error(f"Failed to list files: {e}")
@@ -284,6 +298,7 @@ class SupernoteCloudAPI:
     def _parse_file_info(self, file_data: Dict[str, Any]) -> SupernoteFile:
         """Parse file information from Supernote API response format"""
         try:
+            # Parse file data from API response
             # Handle timestamp conversion
             modified_timestamp = file_data.get('updateTime', 0)
             if isinstance(modified_timestamp, (int, float)):
@@ -296,11 +311,17 @@ class SupernoteCloudAPI:
             file_extension = filename.split('.')[-1].lower() if '.' in filename else ''
             file_type = 'note' if file_extension == 'note' else file_extension
             
+            # Construct path from directory and filename if filePath is empty
+            file_path = file_data.get('filePath', '')
+            if not file_path and filename:
+                # If no filePath provided, use just the filename as path
+                file_path = filename
+            
             return SupernoteFile(
                 file_id=file_data.get('id', ''),
                 name=filename,
-                path=file_data.get('filePath', ''),
-                size=file_data.get('fileSize', 0),
+                path=file_path,
+                size=file_data.get('size', 0),  # API uses 'size', not 'fileSize'
                 modified_time=modified_time,
                 file_type=file_type,
                 checksum=file_data.get('fileMd5', ''),
@@ -334,9 +355,10 @@ class SupernoteCloudAPI:
             return False
         
         try:
-            # Step 1: Get download URL using proven API method
+            # Step 1: Get download URL - use working implementation pattern
             payload = {
-                "id": file.file_id
+                "id": file.file_id,
+                "type": 0  # Required parameter from working sncloud implementation
             }
             
             # Token goes in headers as x-access-token
@@ -345,6 +367,12 @@ class SupernoteCloudAPI:
                 "Content-Type": "application/json"
             }
             
+            logger.info(f"Requesting download URL for file: {file.name} (ID: {file.file_id})")
+            logger.info(f"Download URL payload: {payload}")
+            print(f"🔍 DEBUG: Requesting download URL for file: {file.name} (ID: {file.file_id})")
+            print(f"🔍 DEBUG: Download URL payload: {payload}")
+            
+            # Use the correct endpoint from working implementation
             url_response = self.session.post(
                 f"{self.BASE_URL}{self.ENDPOINTS['download_url']}",
                 json=payload,
@@ -356,12 +384,14 @@ class SupernoteCloudAPI:
                 return False
             
             url_result = url_response.json()
+            logger.info(f"Download URL response: {url_result}")
+            print(f"🔍 DEBUG: Download URL response: {url_result}")
             
             if not url_result.get("success"):
                 logger.error(f"Download URL request unsuccessful: {url_result.get('errorMsg', 'Unknown error')}")
                 return False
             
-            download_url = url_result["data"]
+            download_url = url_result.get("url")  # API returns 'url' field, not 'data'
             
             if not download_url:
                 logger.error(f"No download URL returned for file: {file.name}")
@@ -442,33 +472,50 @@ class SupernoteCloudAPI:
         return downloaded_files
 
 
-def create_supernote_client(config: Dict[str, Any]) -> Optional[SupernoteCloudAPI]:
+def create_supernote_client(config: Dict[str, Any], email: Optional[str] = None, password: Optional[str] = None) -> Optional[SupernoteCloudAPI]:
     """
-    Create Supernote Cloud API client from configuration
+    Create Supernote Cloud API client from configuration or environment
     
     Args:
         config: Configuration dictionary with credentials
+        email: Optional email override (for CLI prompts)
+        password: Optional password override (for CLI prompts)
         
     Returns:
         SupernoteCloudAPI client or None if credentials not available
     """
+    import os
+    from dotenv import load_dotenv
+    
+    # Load .env file if it exists
+    load_dotenv()
     
     supernote_config = config.get('supernote', {})
     
-    if not supernote_config.get('enabled', False):
+    # Check if explicitly disabled
+    if supernote_config.get('enabled') is False:
         logger.info("Supernote Cloud integration is disabled")
         return None
     
+    # Priority order for credentials:
+    # 1. Function parameters (from CLI prompts)
+    # 2. Environment variables from .env
+    # 3. Config file (deprecated for credentials)
+    
     credentials = SupernoteCredentials(
-        email=supernote_config.get('email', ''),
-        password=supernote_config.get('password', ''),
-        access_token=supernote_config.get('access_token', ''),
-        refresh_token=supernote_config.get('refresh_token', ''),
-        device_id=supernote_config.get('device_id', '')
+        email=email or os.getenv('SUPERNOTE_EMAIL') or supernote_config.get('email', ''),
+        password=password or os.getenv('SUPERNOTE_PASSWORD') or supernote_config.get('password', ''),
+        access_token=os.getenv('SUPERNOTE_ACCESS_TOKEN') or supernote_config.get('access_token', ''),
+        refresh_token=os.getenv('SUPERNOTE_REFRESH_TOKEN') or supernote_config.get('refresh_token', ''),
+        device_id=os.getenv('SUPERNOTE_DEVICE_ID') or supernote_config.get('device_id', '')
     )
     
     if not credentials.email:
-        logger.warning("No Supernote email configured")
+        logger.warning("No Supernote email configured (check .env file or use CLI prompt)")
+        return None
+    
+    if not credentials.password and not credentials.access_token:
+        logger.warning("No Supernote password or access token configured")
         return None
     
     client = SupernoteCloudAPI(credentials)

@@ -1,0 +1,17 @@
+Provider: gpt-4o-vision
+Confidence: 95%
+Cost: $0.0109
+Tokens: {'input': 827, 'output': 88}
+========================================
+The first thing Joe Kihiro
+wanted everybody to know was
+that he was Italian. [unclear]
+[unclear] believed him. He had
+his mother's round face and
+korean eyes, but he spoke
+like his Dad. Like his dad
+he had a temper and wasn't
+afraid to lose it in
+public. The first day I
+saw him he was sitting
+on the swings in the

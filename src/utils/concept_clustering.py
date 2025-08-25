@@ -8,7 +8,7 @@ clustering strategies to help organize scattered thoughts into coherent themes.
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Optional, Set, Any
+from typing import Dict, List, Tuple, Set, Any
 from collections import defaultdict, Counter
 import numpy as np
 

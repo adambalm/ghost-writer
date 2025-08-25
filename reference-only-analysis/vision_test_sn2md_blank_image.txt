@@ -1,0 +1,6 @@
+Image: sn2md Blank Image
+Path: /home/ed/ghost-writer/sn2md_png_extraction/temp_20250807_035920.note_0.png
+Expected: Should be completely blank
+Cost: $0.0081
+========================================
+BLANK IMAGE

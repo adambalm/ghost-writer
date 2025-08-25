@@ -1,0 +1,15 @@
+# Decision Log
+
+## Decision 1: Established Verified Working Baseline
+- **Date:** 2025-08-25
+- **Context:** After comprehensive Playwright testing and visual verification, identified that core extraction and transcription capabilities are genuinely functional. Multiple approaches (sn2md, forensic, clean room) all produce readable handwriting output.
+- **Decision:** Create git tag 'baseline-dual-core-verified' as stable rollback point before attempting any integration improvements
+- **Alternatives Considered:** 
+  - Could have continued without tagging
+  - Could have waited for CLI integration fixes  
+  - Could have tested more thoroughly first
+- **Consequences:** 
+  - Provides stable rollback point if future work breaks core functionality
+  - Establishes verified baseline for both extraction approaches
+  - Enables confident iteration on integration improvements
+  - Documents working state with comprehensive test evidence

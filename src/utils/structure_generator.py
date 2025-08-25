@@ -7,9 +7,9 @@ helping users organize scattered thoughts into logical outlines and hierarchies.
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Optional, Any, Set
+from typing import Dict, List, Optional, Any
 from enum import Enum
-from collections import defaultdict, Counter
+from collections import defaultdict
 import numpy as np
 
 from .relationship_detector import NoteElement, Relationship, RelationshipType
@@ -455,7 +455,7 @@ class StructureGenerator:
         for node in structure.root_nodes:
             lines.extend(self._format_node_as_text(node, prefix=""))
         
-        lines.append(f"\n---")
+        lines.append("\n---")
         lines.append(f"Structure Type: {structure.structure_type.value}")
         lines.append(f"Confidence: {structure.confidence:.2f}")
         lines.append(f"Coherence: {structure.coherence_score:.2f}")
