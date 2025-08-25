@@ -257,7 +257,7 @@ class TestHybridOCR:
     def test_hybrid_provider_priority_modes(self):
         """Test provider priority based on quality mode"""
         config = {
-            "provider_priority": ["tesseract", "google_vision", "gpt4_vision"],
+            "provider_priority": ["qwen", "tesseract", "google_vision", "gpt4_vision"],
             "quality_mode": "premium"
         }
         
@@ -266,15 +266,15 @@ class TestHybridOCR:
             
             # Premium mode should prioritize quality
             priority = provider._get_provider_priority("premium", 0.0, 5.0)
-            assert priority[0] == "gpt4_vision"  # Best quality first
+            assert priority[0] == "qwen"  # Best handwriting recognition first
             
             # Fast mode should prioritize speed
             priority = provider._get_provider_priority("fast", 0.0, 5.0)
-            assert priority[0] == "tesseract"  # Fastest first
+            assert priority[0] == "qwen"  # Fastest local model first
             
             # Over budget should only use free providers
             priority = provider._get_provider_priority("balanced", 6.0, 5.0)
-            assert priority == ["tesseract"]
+            assert priority == ["qwen", "tesseract"]
 
 
 @pytest.mark.unit

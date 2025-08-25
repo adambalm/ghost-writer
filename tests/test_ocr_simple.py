@@ -17,7 +17,7 @@ def test_hybrid_provider_priority_logic():
     config = {
         'quality_mode': 'balanced',
         'cost_limit_per_day': 5.0,
-        'provider_priority': ['tesseract', 'google_vision', 'gpt4_vision']
+        'provider_priority': ['qwen', 'tesseract', 'google_vision', 'gpt4_vision']
     }
     
     # Create HybridOCR but bypass provider initialization
@@ -28,12 +28,12 @@ def test_hybrid_provider_priority_logic():
     # Test priority calculation logic directly
     priority = hybrid._get_provider_priority('balanced', 0.0, 5.0)
     
-    assert priority == ['tesseract', 'google_vision', 'gpt4_vision']
+    assert priority == ['qwen', 'tesseract', 'google_vision', 'gpt4_vision']
     
     # Test over-budget scenario
     priority_over_budget = hybrid._get_provider_priority('balanced', 6.0, 5.0)
     
-    assert priority_over_budget == ['tesseract']  # Only free provider when over budget
+    assert priority_over_budget == ['qwen', 'tesseract']  # Only free provider when over budget
 
 
 def test_ocr_result_confidence_validation():
