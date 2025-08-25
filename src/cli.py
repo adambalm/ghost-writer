@@ -16,9 +16,20 @@ from .utils.config import config
 from .utils.database import DatabaseManager
 from .utils.logging_setup import GhostWriterLogger
 from .utils.ocr_providers import HybridOCR
+from .utils.ocr_factory import OCRProviderFactory, create_ocr_result_without_extraction
 from .utils.relationship_detector import RelationshipDetector
 from .utils.concept_clustering import ConceptExtractor, ConceptClusterer
 from .utils.structure_generator import StructureGenerator
+from .utils.exceptions import (
+    GhostWriterError,
+    OCRError,
+    OCRProviderError,
+    OCRConfigurationError,
+    FileProcessingError,
+    SupernoteParsingError,
+    DatabaseError,
+    ConfigurationError
+)
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -109,14 +120,20 @@ def process(ctx, input_path: str, output: Optional[str], format: str,
             }
             ocr_config["hybrid"]["provider_priority"] = ["tesseract"]
         
-        ocr_provider = HybridOCR(provider_config=ocr_config)
+        ocr_provider = OCRProviderFactory.get_provider(provider_config=ocr_config)
         relationship_detector = RelationshipDetector()
         concept_extractor = ConceptExtractor()
         concept_clusterer = ConceptClusterer()  
         structure_generator = StructureGenerator()
         
-    except Exception as e:
+    except (OCRConfigurationError, DatabaseError, ConfigurationError) as e:
         console.print(f"❌ [red]Failed to initialize components: {e}[/red]")
+        if ctx.obj["debug"]:
+            console.print_exception()
+        return
+    except Exception as e:
+        logger.error(f"Unexpected error during initialization: {e}")
+        console.print(f"❌ [red]Unexpected initialization error: {e}[/red]")
         if ctx.obj["debug"]:
             console.print_exception()
         return
@@ -155,10 +172,16 @@ def process(ctx, input_path: str, output: Optional[str], format: str,
                 else:
                     console.print(f"❌ [red]Failed to process {file_path.name}[/red]")
                 
-            except Exception as e:
+            except (FileProcessingError, SupernoteParsingError, OCRError) as e:
                 console.print(f"❌ [red]Error processing {file_path.name}: {e}[/red]")
+                logger.warning(f"Processing error for {file_path}: {e}")
                 if ctx.obj["debug"]:
                     logger.exception(f"Error processing {file_path}")
+            except Exception as e:
+                logger.error(f"Unexpected error processing {file_path}: {e}")
+                console.print(f"❌ [red]Unexpected error processing {file_path.name}: {e}[/red]")
+                if ctx.obj["debug"]:
+                    logger.exception(f"Unexpected error processing {file_path}")
             
             progress.update(task, advance=1)
     
@@ -207,11 +230,24 @@ def process_single_file(
                     all_text_results.append(f"=== Page {i} ===\n{page_result.text}")
             
             if all_text_results:
-                # Create combined OCR result
+                # Create combined OCR result without redundant extraction
                 combined_text = "\n\n".join(all_text_results)
-                ocr_result = type(ocr_provider.extract_text(str(image_paths[0])))
-                ocr_result.text = combined_text
-                ocr_result.provider = f"{ocr_result.provider} (Enhanced Clean Room Decoder)"
+                # Get a sample result to extract metadata
+                sample_result = ocr_provider.extract_text(str(image_paths[0])) if image_paths else None
+                if sample_result:
+                    ocr_result = create_ocr_result_without_extraction(
+                        text=combined_text,
+                        provider=f"{sample_result.provider} (Enhanced Clean Room Decoder)",
+                        confidence=sample_result.confidence,
+                        cost=sample_result.cost * len(image_paths)  # Scale cost by number of pages
+                    )
+                else:
+                    ocr_result = create_ocr_result_without_extraction(
+                        text=combined_text,
+                        provider="Enhanced Clean Room Decoder",
+                        confidence=0.85,
+                        cost=0.0
+                    )
                 logger.info(f"Combined OCR result: {len(combined_text)} characters from {len(all_text_results)} pages")
             else:
                 ocr_result = None
@@ -220,12 +256,18 @@ def process_single_file(
             for img_path in image_paths:
                 try:
                     img_path.unlink()
-                except Exception:
-                    pass
+                except (OSError, IOError) as e:
+                    logger.debug(f"Could not remove temp image {img_path}: {e}")
             temp_dir.rmdir() if temp_dir.exists() and not list(temp_dir.iterdir()) else None
             
+        except SupernoteParsingError as e:
+            logger.error(f"Failed to parse .note file {file_path}: {e}")
+            return None
+        except OCRError as e:
+            logger.error(f"OCR failed for .note file {file_path}: {e}")
+            return None
         except Exception as e:
-            logger.error(f"Failed to process .note file {file_path}: {e}")
+            logger.error(f"Unexpected error processing .note file {file_path}: {e}")
             return None
     else:
         # Image processing
@@ -268,7 +310,7 @@ def process_single_file(
     
     if output_format in ["markdown", "all"]:
         output_file = export_as_markdown(
-            file_path, structures, output_dir, ocr_result
+            file_path, structures, output_dir, ocr_result, structure_generator
         )
         if output_file:
             output_files.append(output_file)
@@ -283,7 +325,7 @@ def process_single_file(
     
     if output_format in ["pdf", "all"]:
         output_file = export_as_pdf(
-            file_path, structures, output_dir, ocr_result
+            file_path, structures, output_dir, ocr_result, structure_generator
         )
         if output_file:
             output_files.append(output_file)
@@ -311,7 +353,8 @@ def create_note_elements_from_ocr(ocr_result):
     return elements
 
 
-def export_as_markdown(file_path: Path, structures, output_dir: Path, ocr_result) -> Optional[str]:
+def export_as_markdown(file_path: Path, structures, output_dir: Path, ocr_result, 
+                      structure_generator: StructureGenerator = None) -> Optional[str]:
     """Export processed note as Markdown"""
     
     output_file = output_dir / f"{file_path.stem}_processed.md"
@@ -334,7 +377,9 @@ def export_as_markdown(file_path: Path, structures, output_dir: Path, ocr_result
                 f.write(f"**Confidence**: {best_structure.confidence:.2%}\n\n")
                 
                 # Export the structured content
-                structure_text = StructureGenerator().export_structure_as_text(best_structure)
+                if structure_generator is None:
+                    structure_generator = StructureGenerator()
+                structure_text = structure_generator.export_structure_as_text(best_structure)
                 f.write(structure_text)
         
         return str(output_file.name)
@@ -374,7 +419,8 @@ def export_as_json(file_path: Path, structures, elements, concepts, clusters,
         return None
 
 
-def export_as_pdf(file_path: Path, structures, output_dir: Path, ocr_result) -> Optional[str]:
+def export_as_pdf(file_path: Path, structures, output_dir: Path, ocr_result, 
+                  structure_generator: StructureGenerator = None) -> Optional[str]:
     """Export processed note as PDF"""
     from reportlab.lib.pagesizes import A4
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
@@ -432,7 +478,9 @@ def export_as_pdf(file_path: Path, structures, output_dir: Path, ocr_result) -> 
             story.append(Spacer(1, 12))
             
             # Export structured content
-            structure_text = StructureGenerator().export_structure_as_text(best_structure)
+            if structure_generator is None:
+                structure_generator = StructureGenerator()
+            structure_text = structure_generator.export_structure_as_text(best_structure)
             for paragraph in structure_text.split('\n'):
                 if paragraph.strip():
                     story.append(Paragraph(paragraph, styles['Normal']))
@@ -477,7 +525,7 @@ def watch(ctx, directory: str, output: Optional[str], interval: int, format: str
             from .utils.structure_generator import StructureGenerator
             from .utils.database import DatabaseManager
             
-            ocr_provider = HybridOCR({})
+            ocr_provider = OCRProviderFactory.get_provider({})
             detector = RelationshipDetector()
             extractor = ConceptExtractor()
             clusterer = ConceptClusterer()

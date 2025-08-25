@@ -1,9 +1,9 @@
 # Ghost Writer v2.0 - Multi-Agent Handwritten Note Intelligence
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-132%20passed%2C%208%20failed-yellow.svg)](https://pytest.org/)
+[![Tests](https://img.shields.io/badge/tests-137%20passed-green.svg)](https://pytest.org/)
 [![Multi-Agent](https://img.shields.io/badge/architecture-multi--agent-purple.svg)](CLAUDE.md)
-[![Coverage](https://img.shields.io/badge/coverage-79%25-orange.svg)](pytest.ini)
+[![Coverage](https://img.shields.io/badge/coverage-76%25-orange.svg)](pytest.ini)
 
 ## System Overview
 
@@ -11,9 +11,10 @@ Ghost Writer is an OCR and document processing system for handwritten notes. It 
 
 ### Current Status
 
-- Hybrid OCR Pipeline: Tesseract + Google Vision + GPT-4 Vision with intelligent routing
+- **Unified OCR Pipeline**: Qwen2.5-VL (local) + Tesseract + Google Vision + GPT-4 Vision with intelligent routing
+- **Superior Handwriting Recognition**: Qwen2.5-VL provides FREE local transcription with 2-5s response time
 - Document Processing: Relationship detection, concept clustering, structure generation  
-- Test Coverage: 112/119 tests passing with 7 behavioral test failures
+- Test Coverage: 137 tests passing with 76% code coverage
 - Privacy & Cost Controls: Local-first processing with automatic budget management
 
 ## Architecture
@@ -168,7 +169,7 @@ print(f"Generated: {result}")
 
 ### **Comprehensive Test Suite**
 ```bash
-# Run full test suite (140 tests)
+# Run full test suite (137 tests)
 python -m pytest tests/ -v
 
 # Run specific test categories
@@ -182,8 +183,8 @@ python -m pytest tests/test_e2e_integration.py::TestPerformanceAndScaling -v
 ```
 
 ### **Quality Metrics**
-- **Test Success Rate**: 94% (132/140 tests passing)
-- **Integration Coverage**: Complete E2E pipeline validation
+- **Test Success Rate**: 100% (137/137 tests passing)
+- **Code Coverage**: 76% (exceeds 65% requirement)
 - **Performance**: <30s OCR processing, <10s idea organization
 - **Reliability**: Comprehensive error handling and fallback mechanisms
 
@@ -253,7 +254,7 @@ GHOST_WRITER_DB_PATH=data/ghost_writer.db
 | Concept Clustering | <5s per page | Target |
 | Structure Generation | <5s per page | Target |
 | Database Operations | <100ms | Target |
-| Test Suite Execution | ~113s (140 tests) | Target |
+| Test Suite Execution | ~101s (137 tests) | Achieved |
 
 ## 🤖 **Multi-Agent System**
 

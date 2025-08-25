@@ -6,8 +6,11 @@
 # Activate Python environment
 source .venv/bin/activate
 
-# Run the quick test
+# Run the quick test (if you have Supernote credentials)
 python scripts/quick_supernote_test.py
+
+# Or test OCR functionality
+python -m src.cli process test_image.png --format markdown
 ```
 
 - **What this does:**
@@ -21,9 +24,9 @@ python scripts/quick_supernote_test.py
 ```bash
 # Use the web interface for file sync and processing
 source .venv/bin/activate
-python web_viewer_demo_simple.py
+python enhanced_web_viewer.py
 
-# Open browser to http://localhost:5000
+# Open browser to http://localhost:5001
 # Login with Supernote credentials and process notes
 ```
 
@@ -68,4 +71,4 @@ Your handwritten notes are now:
 
 ---
 
-**Ready?** Run: `source venv/bin/activate && python quick_supernote_test.py`
+**Ready?** Run: `source .venv/bin/activate && python -m src.cli process your_note.png`

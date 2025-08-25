@@ -41,10 +41,17 @@ ocr:
         If text is unclear, mark it with [unclear] but don't guess.
         Do not add content that wasn't written.
     
+    qwen:
+      # Qwen2.5-VL local vision model via Ollama
+      model_name: "qwen2.5vl:7b"
+      timeout: 120
+      confidence_threshold: 90
+    
     hybrid:
-      # Intelligent routing between providers
-      provider_priority: ["tesseract", "google_vision", "gpt4_vision"]
+      # Intelligent routing between providers (now Qwen first!)
+      provider_priority: ["qwen", "tesseract", "google_vision", "gpt4_vision"]
       confidence_thresholds:
+        qwen: 85                    # Switch if Qwen confidence < 85%
         tesseract: 75               # Switch if tesseract confidence < 75%
         google_vision: 85           # Switch if google_vision confidence < 85%
       cost_limit_per_day: 5.00     # Max daily spend on premium OCR ($)

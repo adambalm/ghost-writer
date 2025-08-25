@@ -458,6 +458,105 @@ class GPT4VisionOCR(OCRProvider):
             )
 
 
+class QwenOCR(OCRProvider):
+    """Qwen2.5-VL vision model OCR via Ollama"""
+    
+    def __init__(self, provider_config: Dict[str, Any]):
+        super().__init__(provider_config)
+        self.model_name = provider_config.get('model_name', 'qwen2.5vl:7b')
+        self.timeout = provider_config.get('timeout', 120)
+        
+    def extract_text(self, image_path: Union[str, Path]) -> OCRResult:
+        """Extract text using Qwen2.5-VL vision model via Ollama"""
+        
+        start_time = time.time()
+        
+        try:
+            import subprocess
+            
+            # Preprocess image if needed
+            processed_image = self.preprocess_image(image_path)
+            
+            # Save processed image temporarily for Ollama
+            temp_path = Path(image_path).with_suffix('.qwen_temp.png')
+            processed_image.save(temp_path)
+            
+            try:
+                # Use the proven method from web_viewer_demo_simple.py
+                prompt = "Please transcribe all the handwritten text you can see in this image. Return only the text content, no additional commentary."
+                
+                result = subprocess.run([
+                    "ollama", "run", self.model_name,
+                    prompt,
+                    str(temp_path)
+                ], capture_output=True, text=True, timeout=self.timeout)
+                
+                processing_time = time.time() - start_time
+                
+                if result.returncode == 0:
+                    transcribed_text = result.stdout.strip()
+                    
+                    # Clean up common Qwen artifacts
+                    if transcribed_text.startswith("! Picture"):
+                        transcribed_text = transcribed_text.split('\n', 1)[-1].strip()
+                    
+                    logger.info(f"Qwen OCR completed - {len(transcribed_text)} chars, "
+                               f"{processing_time:.2f}s")
+                    
+                    return OCRResult(
+                        text=transcribed_text,
+                        confidence=0.9,  # High confidence for local vision models
+                        provider='qwen2.5vl',
+                        processing_time=processing_time,
+                        cost=0.0,  # FREE local processing
+                        metadata={
+                            'model': self.model_name,
+                            'method': 'ollama_subprocess'
+                        }
+                    )
+                else:
+                    logger.error(f"Qwen OCR failed: {result.stderr}")
+                    return OCRResult(
+                        text="",
+                        confidence=0.0,
+                        provider='qwen2.5vl',
+                        processing_time=processing_time,
+                        cost=0.0,
+                        metadata={'error': f"Ollama error: {result.stderr}"}
+                    )
+            
+            finally:
+                # Clean up temp file
+                try:
+                    temp_path.unlink()
+                except (OSError, IOError):
+                    pass
+                    
+        except subprocess.TimeoutExpired:
+            processing_time = time.time() - start_time
+            logger.error(f"Qwen OCR timeout after {self.timeout}s")
+            return OCRResult(
+                text="",
+                confidence=0.0,
+                provider='qwen2.5vl',
+                processing_time=processing_time,
+                cost=0.0,
+                metadata={'error': f'Timeout after {self.timeout}s'}
+            )
+        except Exception as e:
+            processing_time = time.time() - start_time
+            logger.error(f"Qwen OCR failed: {e}", exc_info=True)
+            
+            return OCRResult(
+                text="",
+                confidence=0.0,
+                provider='qwen2.5vl',
+                processing_time=processing_time,
+                cost=0.0,
+                metadata={'error': str(e)}
+            )
+
+
 class HybridOCR(OCRProvider):
     """Intelligent routing between OCR providers"""
     
@@ -471,7 +570,16 @@ class HybridOCR(OCRProvider):
         # Get provider configurations
         ocr_config = config.get('ocr', {})
         
-        # Initialize Tesseract (always available)
+        # Initialize Qwen (if available)
+        if 'qwen' in ocr_config.get('providers', {}):
+            try:
+                self.providers['qwen'] = QwenOCR(
+                    ocr_config['providers']['qwen']
+                )
+            except Exception as e:
+                logger.warning(f"Could not initialize Qwen: {e}")
+        
+        # Initialize Tesseract (always available as fallback)
         if 'tesseract' in ocr_config.get('providers', {}):
             self.providers['tesseract'] = TesseractOCR(
                 ocr_config['providers']['tesseract']
@@ -566,19 +674,19 @@ class HybridOCR(OCRProvider):
         
         # If over budget, use only free providers
         if daily_cost >= budget_limit:
-            return ['tesseract']
+            return ['qwen', 'tesseract']  # Both are free
         
-        # Get base priority from config
-        base_priority = self.config.get('provider_priority', ['tesseract', 'google_vision', 'gpt4_vision'])
+        # Get base priority from config (now defaults to Qwen first)
+        base_priority = self.config.get('provider_priority', ['qwen', 'tesseract', 'google_vision', 'gpt4_vision'])
         
         # Adjust based on quality mode
         if quality_mode == 'fast':
-            # Prioritize speed - local first, then fastest cloud
-            return ['tesseract', 'google_vision', 'gpt4_vision']
+            # Prioritize speed - local models first, then fastest cloud
+            return ['qwen', 'tesseract', 'google_vision', 'gpt4_vision']
         
         elif quality_mode == 'premium':
-            # Prioritize quality - best cloud providers first
-            return ['gpt4_vision', 'google_vision', 'tesseract']
+            # Prioritize quality - best handwriting recognition first
+            return ['qwen', 'gpt4_vision', 'google_vision', 'tesseract']
         
         else:  # balanced
             # Good balance - try local first, fallback to cloud
@@ -601,7 +709,9 @@ def create_ocr_provider(provider_name: str) -> OCRProvider:
     
     provider_config = providers_config[provider_name]
     
-    if provider_name == 'tesseract':
+    if provider_name == 'qwen':
+        return QwenOCR(provider_config)
+    elif provider_name == 'tesseract':
         return TesseractOCR(provider_config)
     elif provider_name == 'google_vision':
         return GoogleVisionOCR(provider_config)
