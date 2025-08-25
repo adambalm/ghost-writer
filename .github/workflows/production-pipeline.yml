@@ -39,7 +39,6 @@ jobs:
         run: |
           pip install mypy==1.11.1
           mypy --config-file mypy.ini src
-        continue-on-error: true
         
       - name: Type Check Diagnostics (on failure)
         if: failure()
@@ -126,10 +125,12 @@ jobs:
           # Deploy to staging cluster
           
       - name: Staging Smoke Tests
+        if: hashFiles('scripts/staging_smoke_tests.py') != ''
         run: |
           python scripts/staging_smoke_tests.py
           
       - name: Performance Benchmarks
+        if: hashFiles('scripts/performance_benchmark.py') != ''
         run: |
           python scripts/performance_benchmark.py --env staging
 
@@ -147,6 +148,7 @@ jobs:
           # Production deployment with rollback capability
           
       - name: Production Health Checks
+        if: hashFiles('scripts/production_health_check.py') != ''
         run: |
           python scripts/production_health_check.py
           
@@ -159,7 +161,17 @@ jobs:
     if: failure()
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      
       - name: Automatic Rollback
+        if: hashFiles('scripts/rollback_deployment.py') != ''
         run: |
           echo "Production deployment failed - initiating rollback..."
           python scripts/rollback_deployment.py
+          
+      - name: Rollback Notification (fallback)
+        if: hashFiles('scripts/rollback_deployment.py') == ''
+        run: |
+          echo "Production deployment failed but no rollback script available"
+          echo "Manual intervention required"
+          exit 1
