@@ -55,8 +55,8 @@
 
 ### Authentication System (*Claude Code Addition*)
 - **Type**: Supernote Cloud API integration
-- **Credentials**: Phone number + password (not email-based)
-- **Storage**: Environment variables (`SUPERNOTE_PHONE`, `SUPERNOTE_PASSWORD`)
+- **Credentials**: Phone number OR email + password (dual support)
+- **Storage**: Environment variables (`SUPERNOTE_PHONE`/`SUPERNOTE_EMAIL`, `SUPERNOTE_PASSWORD`)
 - **Hashing**: MD5+SHA256 dual hashing for passwords
 - **Session Management**: Flask sessions with `secrets.token_urlsafe(32)`
 - **Auto-Authentication**: Automatic login using environment variables
@@ -153,6 +153,8 @@ memory-bank/                        # MCP memory persistence
 - ✅ **Layer Processing**: MAINLAYER + BGLAYER composition
 - ✅ **Visibility Modes**: DEFAULT, INVISIBLE mode support
 - ✅ **Batch Processing**: Parallel extraction pipeline
+- ✅ **Web Interface**: Multiple Flask applications (enhanced_web_viewer.py, web_viewer_with_auth.py, etc.)
+- ✅ **Cloud Authentication**: Both phone/email based Supernote login
 
 ### Technical Challenges Identified
 - **Licensing Risk**: Current dependency on `sn2md/supernotelib` (potential commercial licensing conflicts)
@@ -211,7 +213,7 @@ memory-bank/                        # MCP memory persistence
 ### Quality Gates
 - All tests must pass
 - MyPy compliance required
-- Coverage must exceed 65% (currently 76%)
+- Coverage must exceed 65% (currently 68%)
 - Branch protection prevents direct pushes to main
 
 ## Current Technical Debt (*Claude Code Addition*)
