@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>0322178f-38e9-43f2-883a-3fa80ecd7d34</string>
+	<key>PayloadDisplayName</key>
+	<string>Ed Dev Root CA</string>
+	<key>PayloadIdentifier</key>
+	<string>com.ed.dev.root.profile</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>PayloadType</key>
+			<string>com.apple.security.root</string>
+			<key>PayloadUUID</key>
+			<string>21220c9b-cc10-4b66-92d7-fa8e37769fe8</string>
+			<key>PayloadIdentifier</key>
+			<string>com.ed.dev.ca</string>
+			<key>PayloadDisplayName</key>
+			<string>Ed Dev Root CA</string>
+			<key>PayloadDescription</key>
+			<string>Installs Ed Dev Root CA</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>PayloadCertificateFileName</key>
+			<string>ca-certificate.cer</string>
+			<key>PayloadContent</key>
+			<data>
+			MIIEYjCCA0qgAwIBAgIUXDgIVz/ZglUIWYbWRB/l0Cii4LswDQYJKoZIhvcNAQELBQAwgbYxCzAJBgNVBAYTAlVTMRQwEgYDVQQIDAtEZXZlbG9wbWVudDEOMAwGA1UEBwwFTG9jYWwxITAfBgNVBAoMGEdob3N0IFdyaXRlciBEZXZlbG9wbWVudDEeMBwGA1UECwwVQ2VydGlmaWNhdGUgQXV0aG9yaXR5MRgwFgYDVQQDDA9HaG9zdCBXcml0ZXIgQ0ExJDAiBgkqhkiG9w0BCQEWFWRldkBnaG9zdHdyaXRlci5sb2NhbDAeFw0yNTA4MjUxNzQ4MjRaFw0zNTA4MjMxNzQ4MjRaMIG2MQswCQYDVQQGEwJVUzEUMBIGA1UECAwLRGV2ZWxvcG1lbnQxDjAMBgNVBAcMBUxvY2FsMSEwHwYDVQQKDBhHaG9zdCBXcml0ZXIgRGV2ZWxvcG1lbnQxHjAcBgNVBAsMFUNlcnRpZmljYXRlIEF1dGhvcml0eTEYMBYGA1UEAwwPR2hvc3QgV3JpdGVyIENBMSQwIgYJKoZIhvcNAQkBFhVkZXZAZ2hvc3R3cml0ZXIubG9jYWwwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC69L/AdaRF/1WIInxXoHUgIUNQtCF3IPaivXSfRb8dbGpS7M6e6S1yAIKFxoWFC8pJzboymyR71huiAPNHlBkahomH9gYooIL+9jKOBjzpRl/rgmR6bUPjr+VdqWhwN2JinYHQ/gTO6aLJrxEqVUABCe0Ui5nknRPNqNEwXhmPaOU9+H8sOTTvgUzlAu9psjydRS3vHuDJZ483PhEN5a1TQUunk4oXpyQWIT/8toQG3rG0UUrLnaauUIBJpDH0aWn7jU61356n1Q9jQvE8/mYnBCns5LzBLqi0RA6vLJwsq4O2MladxJTbrIKXbwLBZI/8ch9Zep/HpgsmdwEjFuo3AgMBAAGjZjBkMB0GA1UdDgQWBBSQRK2qJLEMfIOtNVjXJk2Fq0BfrDAfBgNVHSMEGDAWgBSQRK2qJLEMfIOtNVjXJk2Fq0BfrDASBgNVHRMBAf8ECDAGAQH/AgEAMA4GA1UdDwEB/wQEAwIBBjANBgkqhkiG9w0BAQsFAAOCAQEAj/kti0ES/jt2+OvdaBcS3QGuiJQQYhOd8Isy2F4KhV0zotznt+MCLXBYsMWpC6vsy34CcUsChD7IXj80O2FUO8BDjgzGi5ZCer6TVEIsM8RXHwtgdwd7qYoFDppqbAGXAH8+WeW8vQpJg1Aupg9nowxUISbXsHgW4LL1K60d7J5Bgt/8/GZyTANcJtIq5v8lM4RSj8DhRKGVH+pQ9RgR+UAy4RdvcyvZ3uh8JY6xqkLpbejImlvcpYJB5UFaL+OKFjgz9/iwhkXJyCQHh78S92900Bi6z4v0BLr4h5l3D6fqVsxqd/6uW9Wy5MgsSkYMHPvbBdUjSUOCcmi4w5q1uw==
+			</data>
+		</dict>
+	</array>
+</dict>
+</plist>
