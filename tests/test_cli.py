@@ -109,7 +109,7 @@ class TestCLI:
         assert result.exit_code == 0
         assert "No supported files found" in result.output
     
-    @patch('src.utils.supernote_parser.convert_note_to_images')
+    @patch('src.utils.supernote_parser_enhanced.convert_note_to_images')
     @patch('src.cli.HybridOCR')
     @patch('src.cli.DatabaseManager')
     def test_process_note_file(self, mock_db, mock_ocr, mock_convert):
@@ -312,7 +312,7 @@ class TestSingleFileProcessing:
         
         # Verify all components were called
         mock_ocr.extract_text.assert_called_once()
-        mock_db.store_note.assert_called_once()
+        mock_db.insert_note.assert_called_once()
         mock_relation.detect_relationships.assert_called_once()
     
     @patch('src.cli.HybridOCR')
