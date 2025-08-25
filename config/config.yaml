@@ -114,7 +114,7 @@ files:
 
 # Supernote Cloud Integration
 supernote:
-  enabled: false                     # Enable Supernote Cloud sync
+  enabled: true                      # Enable Supernote Cloud sync
   email_env: "SUPERNOTE_EMAIL"       # Environment variable for account email
   password_env: "SUPERNOTE_PASSWORD" # Environment variable for account password
   access_token_env: "SUPERNOTE_ACCESS_TOKEN"   # Environment variable for access token

@@ -11,9 +11,9 @@ from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 
-from ..utils.supernote_parser_enhanced import convert_note_to_images
-from ..utils.ocr_providers import OCRProvider
-from ..utils.supernote_api import create_supernote_client, SupernoteFile
+from src.utils.supernote_parser_enhanced import convert_note_to_images
+from src.utils.ocr_providers import HybridOCR
+from src.utils.supernote_api import create_supernote_client, SupernoteFile
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,8 @@ class SupernoteService:
     """Unified service for Supernote file processing"""
     
     def __init__(self):
-        self.ocr_provider = OCRProvider()
+        from src.utils.config import config
+        self.ocr_provider = HybridOCR(config.get('ocr', {}))
     
     def process_note_file(self, note_path: Path, output_dir: Path) -> Dict:
         """
@@ -83,7 +84,7 @@ class SupernoteService:
             True if authentication successful
         """
         try:
-            from ..utils.config import config
+            from src.utils.config import config
             client = create_supernote_client(config, email=phone, password=password)
             return client is not None
         except Exception as e:
@@ -98,7 +99,7 @@ class SupernoteService:
             List of SupernoteFile objects
         """
         try:
-            from ..utils.config import config
+            from src.utils.config import config
             client = create_supernote_client(config)
             if not client:
                 logger.error("Not authenticated with Supernote Cloud")
@@ -121,7 +122,7 @@ class SupernoteService:
             True if download successful
         """
         try:
-            from ..utils.config import config
+            from src.utils.config import config
             client = create_supernote_client(config)
             if not client:
                 logger.error("Not authenticated with Supernote Cloud")

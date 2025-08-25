@@ -6,20 +6,33 @@ Run this to test if you can connect to your Supernote Cloud account
 
 import sys
 import getpass
+import os
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from utils.supernote_api import create_supernote_client
+from dotenv import load_dotenv
 
 def main():
     print("Supernote Cloud Authentication Test")
     print("-" * 40)
-    print("\nEnter your Supernote Cloud credentials:")
-    print("(For US phone numbers, enter digits only, e.g., 5551234567)")
-    print("(For email accounts, enter your full email address)")
     
-    account = input("\nAccount (phone/email): ").strip()
-    password = getpass.getpass("Password: ")
+    # Load environment variables
+    load_dotenv()
+    
+    # Try environment variables first
+    account = os.getenv('SUPERNOTE_PHONE') or os.getenv('SUPERNOTE_EMAIL')
+    password = os.getenv('SUPERNOTE_PASSWORD')
+    
+    if not account or not password:
+        print("\nEnter your Supernote Cloud credentials:")
+        print("(For US phone numbers, enter digits only, e.g., 5551234567)")
+        print("(For email accounts, enter your full email address)")
+        
+        account = input("\nAccount (phone/email): ").strip()
+        password = getpass.getpass("Password: ")
+    else:
+        print("\nUsing credentials from environment variables")
     
     print(f"\nConnecting with account: {account}")
     print("Authenticating...")
